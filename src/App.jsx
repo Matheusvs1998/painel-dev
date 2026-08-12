@@ -493,9 +493,8 @@ export default function App() {
               <div style={{ ...card, padding: '1.25rem', borderColor: C.neonBorder }}>
                 <p style={{ fontSize: '0.875rem', fontWeight: '500', margin: '0 0 0.25rem' }}>URL do Webhook</p>
                 <p style={{ fontSize: '0.75rem', color: C.muted, margin: '0 0 0.75rem' }}>Adicione no Settings → Webhooks do repositório GitHub:</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', background: C.bg, borderRadius: '0.5rem', padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.875rem', color: C.neon }}>
-                  <Globe size={14} style={{ flexShrink: 0 }} />
-                  http://localhost:3001/api/webhooks/github
+                <div style={{ padding: '1.25rem', background: C.bg, borderRadius: '0.75rem', border: `1px solid ${C.border}`, fontFamily: 'monospace', color: C.neon, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.875rem' }}>
+                  <Globe size={16} /> https://vdugwerpiuisyiwwkggg.supabase.co/functions/v1/github-webhook
                 </div>
               </div>
               <div style={card}>
