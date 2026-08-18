@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import Auth from './components/Auth';
+import ProfileModal from './components/ProfileModal';
+import { supabase } from './lib/supabase';
 import {
   Inbox, Bell, LayoutDashboard, GitBranch as Github,
   Users, BarChart2, Radio, Link2, FileText, Search,
   Activity, ArrowUpRight, ArrowDownRight, MessageSquare,
   Wifi, WifiOff, Send, CheckCircle, AlertCircle, Globe, Zap,
-  Server, ChevronRight, Clock, User
+  Server, ChevronRight, Clock, User, Sun, Moon
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -16,16 +19,17 @@ const API = 'http://localhost:3001';
 
 // ── Design tokens ──────────────────────────────
 const C = {
-  bg:        '#060a0a',
-  card:      '#0d1313',
-  border:    '#161e1e',
-  hover:     'rgba(22,30,30,0.6)',
-  neon:      '#00ff9d',
-  neonDim:   'rgba(0,255,157,0.15)',
-  neonBorder:'rgba(0,255,157,0.3)',
-  muted:     '#8b9d9d',
-  subtle:    '#546666',
-  red:       '#f87171',
+  bg:        'var(--bg)',
+  card:      'var(--card)',
+  border:    'var(--border)',
+  hover:     'var(--hover)',
+  neon:      'var(--neon)',
+  neonDim:   'var(--neonDim)',
+  neonBorder:'var(--neonBorder)',
+  muted:     'var(--muted)',
+  subtle:    'var(--subtle)',
+  red:       'var(--red)',
+  text:      'var(--text)',
   yellow:    '#facc15',
   blue:      '#60a5fa',
 };
@@ -85,7 +89,7 @@ function StatCard({ label, value, trendLabel, positive = true }) {
   return (
     <div style={{ ...card, padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
       <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</p>
-      <p style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
+      <p style={{ fontSize: '1.5rem', fontWeight: '700', color: C.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</p>
       <p style={{ fontSize: '0.7rem', color: positive ? C.neon : C.red, display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
         {positive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
         {trendLabel}
@@ -98,7 +102,7 @@ function StatCard({ label, value, trendLabel, positive = true }) {
 function SectionHeader({ title, subtitle }) {
   return (
     <div style={{ marginBottom: '1.5rem' }}>
-      <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: '#fff', margin: 0 }}>{title}</h2>
+      <h2 style={{ fontSize: '1.25rem', fontWeight: '700', color: C.text, margin: 0 }}>{title}</h2>
       {subtitle && <p style={{ fontSize: '0.875rem', color: C.muted, marginTop: '0.25rem' }}>{subtitle}</p>}
     </div>
   );
@@ -107,7 +111,24 @@ function SectionHeader({ title, subtitle }) {
 // ── App ─────────────────────────────────────────
 export default function App() {
   const { t, i18n } = useTranslation();
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const [activeTab, setActiveTab] = useState('overview');
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [status, setStatus] = useState(t('header.checking'));
   const [waStatus, setWaStatus] = useState('disconnected');
   const [qrCode, setQrCode] = useState(null);
@@ -116,6 +137,12 @@ export default function App() {
   const [waMessage, setWaMessage] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [pingMs, setPingMs] = useState(null);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const inboxItems = useMemo(() => {
     return githubEvents.slice(0, 3).map((ev, i) => {
@@ -222,20 +249,6 @@ export default function App() {
   const waPct = waStatus === 'connected' ? 100 : waStatus === 'qr_ready' ? 50 : 10;
   const pieData = [{ value: waPct }, { value: 100 - waPct }];
 
-  const endpoints = [
-    { method: 'GET', path: '/api/status', desc: t('dashboard.endpoints.serverStatus'), code: 200 },
-    { method: 'GET', path: '/api/whatsapp/status', desc: t('dashboard.endpoints.waStatus'), code: 200 },
-    { method: 'POST', path: '/api/whatsapp/send', desc: t('dashboard.endpoints.sendMsg'), code: waStatus === 'connected' ? 200 : 400 },
-    { method: 'GET', path: '/api/webhooks/github/events', desc: t('dashboard.endpoints.listGithub'), code: 200 },
-    { method: 'POST', path: '/api/webhooks/github', desc: t('dashboard.endpoints.receiveGithub'), code: 200 },
-  ];
-
-  const contacts = [
-    { name: 'GitHub Actions', type: 'Bot', status: 'active', events: githubEvents.length },
-    { name: 'WhatsApp Bot', type: 'Agente', status: waStatus, events: 0 },
-    { name: 'Supabase', type: 'Banco', status: 'active', events: githubEvents.length },
-  ];
-
   const navGroups = [
     {
       items: [
@@ -271,18 +284,24 @@ export default function App() {
     borderRadius: '0.5rem',
     padding: '0.6rem 1rem',
     fontSize: '0.875rem',
-    color: '#fff',
+    color: C.text,
     outline: 'none',
     width: '100%',
     fontFamily: 'Inter, sans-serif',
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: C.bg, color: '#fff', fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
+    !session ? <Auth /> : (
+    <div style={{ display: 'flex', height: '100vh', background: C.bg, color: C.text, fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
 
       {/* ── SIDEBAR ── */}
       <aside style={{ width: '224px', borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem', overflowY: 'auto', flexShrink: 0 }}>
-        <h1 style={{ fontSize: '1.2rem', fontWeight: '700', color: C.neon, marginBottom: '2rem', padding: '0 0.5rem' }}>DevDashboard</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', padding: '0 0.5rem' }}>
+          <div style={{ width: '2rem', height: '2rem', background: C.neon, borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 10px ${C.neonBorder}` }}>
+            <span style={{ color: C.bg, fontWeight: '900', fontSize: '1rem', letterSpacing: '-1px' }}>&lt;/&gt;</span>
+          </div>
+          <h1 style={{ margin: 0, color: C.text, fontSize: '1.25rem', fontWeight: 'bold' }}>DevSystem</h1>
+        </div>
 
         {navGroups.map((group, gi) => (
           <div key={gi} style={{ marginTop: gi > 0 ? '1.5rem' : 0, marginBottom: '0.5rem' }}>
@@ -335,10 +354,35 @@ export default function App() {
               {t('header.backendStatus')} {status} {pingMs ? `· ${pingMs}ms` : ''}
             </div>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '0.875rem', fontWeight: '500', margin: 0 }}>Matheus</p>
-              <p style={{ fontSize: '0.7rem', color: C.subtle, margin: 0 }}>admin@dev.com</p>
+              <p style={{ fontSize: '0.875rem', fontWeight: '500', margin: 0, textTransform: 'capitalize' }}>
+                {session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'Usuário'}
+              </p>
+              <p style={{ fontSize: '0.7rem', color: C.subtle, margin: 0 }}>
+                {session?.user?.email}
+              </p>
             </div>
-            <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Matheus" alt="User" style={{ width: '2.25rem', height: '2.25rem', borderRadius: '50%', border: `2px solid ${C.border}`, background: C.card }} />
+            <img 
+              src={session?.user?.user_metadata?.custom_avatar_url || `https://api.dicebear.com/7.x/avataaars/svg?seed=${session?.user?.user_metadata?.avatar_seed || session?.user?.email || 'User'}`} 
+              alt="User" 
+              title="Editar Perfil"
+              onClick={() => setIsProfileOpen(true)}
+              style={{ width: '2.25rem', height: '2.25rem', borderRadius: '50%', border: `2px solid ${C.border}`, background: C.card, cursor: 'pointer', transition: 'border 0.2s', objectFit: 'cover' }} 
+              onMouseEnter={(e) => e.currentTarget.style.borderColor = C.neon}
+              onMouseLeave={(e) => e.currentTarget.style.borderColor = C.border}
+            />
+            <button
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              style={{ 
+                background: C.card, border: `1px solid ${C.border}`, borderRadius: '0.5rem', 
+                padding: '0.4rem', cursor: 'pointer', color: C.neon, display: 'flex', 
+                alignItems: 'center', justifyContent: 'center', marginLeft: '0.5rem',
+                transition: 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease',
+                transform: theme === 'dark' ? 'rotate(0deg)' : 'rotate(360deg)'
+              }}
+              title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
+            >
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
             <select
               value={i18n.language}
               onChange={(e) => i18n.changeLanguage(e.target.value)}
@@ -365,7 +409,7 @@ export default function App() {
                 <StatCard label="Ping" value={pingMs ? `${pingMs} ms` : '—'} trendLabel={t('dashboard.lastMeasurement')} />
               </div>
 
-              <div style={{ display: 'flex', gap: '1.5rem', height: '280px' }}>
+              <div style={{ display: 'flex', gap: '1.5rem', minHeight: '280px' }}>
                 <div style={{ ...card, padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>{t('dashboard.eventsPerDay')}</p>
                   <div style={{ flex: 1 }}>
@@ -395,13 +439,13 @@ export default function App() {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie data={pieData} cx="50%" cy="50%" innerRadius={42} outerRadius={52} startAngle={90} endAngle={-270} dataKey="value" stroke="none">
-                            <Cell fill={C.neon} />
-                            <Cell fill="#233030" />
+                            <Cell fill={waStatus === 'connected' ? C.neon : waStatus === 'qr_ready' ? C.yellow : C.red} />
+                            <Cell fill="rgba(255,255,255,0.05)" />
                           </Pie>
                         </PieChart>
                       </ResponsiveContainer>
                       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: '1.25rem', fontWeight: '700' }}>{waPct}%</span>
+                        <span style={{ fontSize: '1.25rem', fontWeight: '700', color: C.text }}>{waPct}%</span>
                       </div>
                     </div>
                     <p style={{ fontSize: '0.7rem', color: C.subtle, marginTop: '0.5rem' }}>{t('dashboard.basedOnConnection')}</p>
@@ -757,8 +801,31 @@ export default function App() {
               )}
             </div>
           )}
+
+          {/* ── FALLBACK FOR UNIMPLEMENTED TABS ── */}
+          {!['overview', 'whatsapp', 'github', 'endpoints', 'reports'].includes(activeTab) && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1rem', color: C.muted }}>
+              <div style={{ width: '5rem', height: '5rem', background: C.card, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: `1px solid ${C.border}`, boxShadow: `0 0 20px ${C.neonDim}` }}>
+                <Terminal size={32} color={C.neon} />
+              </div>
+              <h2 style={{ fontSize: '1.25rem', color: C.text, margin: 0, fontWeight: 'bold' }}>Módulo em Desenvolvimento</h2>
+              <p style={{ fontSize: '0.875rem', textAlign: 'center', maxWidth: '300px' }}>
+                A tela de <strong>{t(`nav.${activeTab}`)}</strong> ainda está sendo construída e chegará em futuras atualizações!
+              </p>
+            </div>
+          )}
+
         </div>
       </main>
+
+      {isProfileOpen && (
+        <ProfileModal 
+          session={session} 
+          onClose={() => setIsProfileOpen(false)} 
+        />
+      )}
+
     </div>
+    )
   );
 }
