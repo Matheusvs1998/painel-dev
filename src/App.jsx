@@ -8,7 +8,7 @@ import {
   Users, BarChart2, Radio, Link2, FileText, Search,
   Activity, ArrowUpRight, ArrowDownRight, MessageSquare,
   Wifi, WifiOff, Send, CheckCircle, AlertCircle, Globe, Zap,
-  Server, ChevronRight, Clock, User, Sun, Moon
+  Server, ChevronRight, Clock, User, Sun, Moon, Menu, X, Terminal
 } from 'lucide-react';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -47,6 +47,20 @@ const TOOLTIP_STYLE = {
   fontSize: 12,
   color: '#fff',
 };
+
+const MOCK_CONTACTS = [
+  { name: 'GitHub Webhook Bot', type: 'Bot', status: 'active', events: 156 },
+  { name: 'WhatsApp Assistant', type: 'Agente', status: 'connected', events: 34 },
+  { name: 'Supabase Sync', type: 'Serviço', status: 'active', events: 890 }
+];
+
+const MOCK_ENDPOINTS = [
+  { method: 'GET', path: '/api/status', desc: 'Verifica status da API', code: 200 },
+  { method: 'GET', path: '/api/whatsapp/messages', desc: 'Histórico', code: 200 },
+  { method: 'POST', path: '/api/whatsapp/send', desc: 'Envia mensagem', code: 200 },
+  { method: 'POST', path: '/api/webhooks/github', desc: 'Recebe payloads', code: 200 },
+  { method: 'GET', path: '/api/webhooks/github/events', desc: 'Retorna eventos', code: 200 }
+];
 
 // ── NavItem ─────────────────────────────────────
 function NavItem({ icon: Icon, label, badge, active, onClick, neonIcon }) {
@@ -135,9 +149,11 @@ export default function App() {
   const [githubEvents, setGithubEvents] = useState([]);
   const [waNumber, setWaNumber] = useState('');
   const [waMessage, setWaMessage] = useState('');
+  const [waChatHistory, setWaChatHistory] = useState([]);
   const [isSending, setIsSending] = useState(false);
   const [pingMs, setPingMs] = useState(null);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -224,6 +240,13 @@ export default function App() {
         .then(r => r.json())
         .then(d => setGithubEvents(d))
         .catch(() => {});
+
+      if (waStatus === 'connected') {
+        fetch(`${API}/api/whatsapp/messages`)
+          .then(r => r.json())
+          .then(d => setWaChatHistory(d))
+          .catch(() => {});
+      }
     };
     fetchAll();
     const iv = setInterval(fetchAll, 3000);
@@ -292,15 +315,20 @@ export default function App() {
 
   return (
     !session ? <Auth /> : (
-    <div style={{ display: 'flex', height: '100vh', background: C.bg, color: C.text, fontFamily: 'Inter, system-ui, sans-serif', overflow: 'hidden' }}>
+    <div className="flex h-screen bg-[var(--bg)] text-[var(--text)] font-sans overflow-hidden flex-col md:flex-row">
 
       {/* ── SIDEBAR ── */}
-      <aside style={{ width: '224px', borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', padding: '1.5rem 1rem', overflowY: 'auto', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', padding: '0 0.5rem' }}>
-          <div style={{ width: '2rem', height: '2rem', background: C.neon, borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 10px ${C.neonBorder}` }}>
-            <span style={{ color: C.bg, fontWeight: '900', fontSize: '1rem', letterSpacing: '-1px' }}>&lt;/&gt;</span>
+      <aside className={`fixed md:relative z-50 md:z-auto w-64 md:w-56 h-full flex flex-col py-6 px-4 overflow-y-auto shrink-0 transition-transform ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 bg-[var(--bg)] border-r border-[var(--border)]`}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '2rem', padding: '0 0.5rem', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <div style={{ width: '2rem', height: '2rem', background: C.neon, borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 0 10px ${C.neonBorder}` }}>
+              <span style={{ color: C.bg, fontWeight: '900', fontSize: '1rem', letterSpacing: '-1px' }}>&lt;/&gt;</span>
+            </div>
+            <h1 style={{ margin: 0, color: C.text, fontSize: '1.25rem', fontWeight: 'bold' }}>DevSystem</h1>
           </div>
-          <h1 style={{ margin: 0, color: C.text, fontSize: '1.25rem', fontWeight: 'bold' }}>DevSystem</h1>
+          <button className="md:hidden text-[var(--muted)]" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={20} />
+          </button>
         </div>
 
         {navGroups.map((group, gi) => (
@@ -343,10 +371,15 @@ export default function App() {
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Top bar */}
-        <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-          <div style={{ position: 'relative' }}>
-            <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: C.subtle }} />
-            <input type="text" placeholder={t('header.searchPlaceholder')} style={{ ...inputStyle, paddingLeft: '2.25rem', width: '200px', borderRadius: '9999px' }} />
+        <header className="flex justify-between items-center p-4 md:px-8 border-b border-[var(--border)] shrink-0 gap-4">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden text-[var(--neon)]" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <div style={{ position: 'relative' }} className="hidden sm:block">
+              <Search size={14} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: C.subtle }} />
+              <input type="text" placeholder={t('header.searchPlaceholder')} style={{ ...inputStyle, paddingLeft: '2.25rem', width: '200px', borderRadius: '9999px' }} />
+            </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', padding: '0.4rem 0.75rem', borderRadius: '9999px', background: status === t('header.online') ? C.neonDim : 'rgba(248,113,113,0.1)', color: status === t('header.online') ? C.neon : C.red }}>
@@ -402,17 +435,17 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title={t('nav.overview')} subtitle={t('dashboard.overviewSubtitle')} />
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard label={t('dashboard.githubEvents')} value={githubEvents.length} trendLabel={t('dashboard.thisWeek')} />
                 <StatCard label={t('header.backendStatus')} value={status} trendLabel={status === t('header.online') ? t('dashboard.stable') : t('dashboard.failed')} positive={status === t('header.online')} />
                 <StatCard label={t('nav.whatsapp')} value={waStatus} trendLabel={waStatus === 'connected' ? t('dashboard.connected') : t('dashboard.disconnected')} positive={waStatus === 'connected'} />
                 <StatCard label="Ping" value={pingMs ? `${pingMs} ms` : '—'} trendLabel={t('dashboard.lastMeasurement')} />
               </div>
 
-              <div style={{ display: 'flex', gap: '1.5rem', minHeight: '280px' }}>
+              <div className="flex flex-col lg:flex-row gap-6 min-h-[280px]">
                 <div style={{ ...card, padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>{t('dashboard.eventsPerDay')}</p>
-                  <div style={{ flex: 1 }}>
+                  <div style={{ flex: 1, minHeight: '200px' }}>
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
                         <defs>
@@ -432,7 +465,7 @@ export default function App() {
                   </div>
                 </div>
 
-                <div style={{ width: '260px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div className="w-full lg:w-[260px] flex flex-col gap-4">
                   <div style={{ ...card, padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                     <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', alignSelf: 'flex-start' }}>WA Readiness</p>
                     <div style={{ position: 'relative', width: '112px', height: '112px' }}>
@@ -541,8 +574,8 @@ export default function App() {
                   <Globe size={16} /> https://vdugwerpiuisyiwwkggg.supabase.co/functions/v1/github-webhook
                 </div>
               </div>
-              <div style={card}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', padding: '1rem', fontSize: '0.65rem', color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}` }}>
+              <div className="glass-panel overflow-x-auto">
+                <div style={{ minWidth: '600px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', padding: '1rem', fontSize: '0.65rem', color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}` }}>
                   <span>Evento</span><span>Ação</span><span>Repositório</span><span>Autor</span><span>Horário</span>
                 </div>
                 {githubEvents.length === 0 ? (
@@ -551,7 +584,7 @@ export default function App() {
                     <p style={{ margin: 0 }}>Nenhum evento recebido ainda.</p>
                   </div>
                 ) : githubEvents.map(ev => (
-                  <div key={ev.id} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', padding: '1rem', alignItems: 'center', borderBottom: `1px solid ${C.border}` }}>
+                  <div key={ev.id} style={{ minWidth: '600px', display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '1rem', padding: '1rem', alignItems: 'center', borderBottom: `1px solid ${C.border}` }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
                       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: C.neon, flexShrink: 0 }}></span>{ev.event}
                     </span>
@@ -569,8 +602,8 @@ export default function App() {
           {activeTab === 'whatsapp' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title={t('dashboard.waAgent', 'Agente WhatsApp')} subtitle={t('dashboard.waSubtitle', 'Conecte e gerencie seu bot de WhatsApp')} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div style={{ ...card, padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div style={{ ...card, padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }} className="flex-1 lg:max-w-xs">
                   <div style={{ width: '4rem', height: '4rem', borderRadius: '50%', background: waStatus === 'connected' ? C.neonDim : C.border, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1rem', color: waStatus === 'connected' ? C.neon : C.subtle }}>
                     {waStatus === 'connected' ? <Wifi size={28} /> : <WifiOff size={28} />}
                   </div>
@@ -590,21 +623,28 @@ export default function App() {
                   )}
                 </div>
 
-                <div style={{ ...card, padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <p style={{ fontSize: '0.875rem', fontWeight: '500', margin: 0 }}>{t('dashboard.sendTestMsg', 'Enviar Mensagem de Teste')}</p>
-                  <div>
-                    <label style={{ fontSize: '0.75rem', color: C.muted, display: 'block', marginBottom: '0.375rem' }}>{t('dashboard.numberLabel', 'Número (DDI+DDD+Número)')}</label>
-                    <input type="text" placeholder="5511999999999" value={waNumber} onChange={e => setWaNumber(e.target.value)} style={inputStyle} />
+                <div style={{ ...card, display: 'flex', flexDirection: 'column' }} className="flex-1 overflow-hidden h-[500px]">
+                  <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+                    {waChatHistory.length === 0 ? (
+                      <p style={{ color: C.subtle, textAlign: 'center', margin: 'auto' }}>Nenhuma mensagem recente.</p>
+                    ) : waChatHistory.map(m => (
+                      <div key={m.id} className={`max-w-[80%] rounded-lg p-3 ${m.isMe ? 'bg-[var(--neonDim)] border border-[var(--neonBorder)] text-[var(--neon)] self-end' : 'bg-[var(--hover)] border border-[var(--border)] text-[var(--text)] self-start'}`}>
+                        <p className="text-xs opacity-70 mb-1">{m.from}</p>
+                        <p className="text-sm whitespace-pre-wrap m-0">{m.body}</p>
+                      </div>
+                    ))}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '0.75rem', color: C.muted, display: 'block', marginBottom: '0.375rem' }}>{t('dashboard.message')}</label>
-                    <textarea placeholder={t('dashboard.msgPlaceholder', 'Digite a mensagem...')} value={waMessage} onChange={e => setWaMessage(e.target.value)}
-                      style={{ ...inputStyle, minHeight: '120px', resize: 'none' }} />
+                  
+                  <div style={{ borderTop: `1px solid ${C.border}`, padding: '1rem' }} className="flex flex-col gap-3 bg-[var(--card)]">
+                    <div className="flex gap-2">
+                      <input type="text" placeholder="5511999999999" value={waNumber} onChange={e => setWaNumber(e.target.value)} style={{ ...inputStyle, width: undefined }} className="w-1/3" />
+                      <input type="text" placeholder="Mensagem..." value={waMessage} onChange={e => setWaMessage(e.target.value)} style={{ ...inputStyle, width: undefined }} className="flex-1 min-w-0" onKeyDown={e => e.key === 'Enter' && handleSend()} />
+                      <button onClick={handleSend} disabled={isSending || waStatus !== 'connected'}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 1rem', borderRadius: '0.5rem', border: 'none', cursor: waStatus === 'connected' ? 'pointer' : 'not-allowed', background: waStatus === 'connected' ? C.neon : C.border, color: waStatus === 'connected' ? C.bg : C.subtle, transition: 'all 0.2s' }}>
+                        <Send size={18} />
+                      </button>
+                    </div>
                   </div>
-                  <button onClick={handleSend} disabled={isSending || waStatus !== 'connected'}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.75rem', borderRadius: '0.5rem', border: 'none', cursor: waStatus === 'connected' ? 'pointer' : 'not-allowed', fontFamily: 'Inter, sans-serif', fontSize: '0.875rem', fontWeight: '500', background: waStatus === 'connected' ? C.neon : C.border, color: waStatus === 'connected' ? C.bg : C.subtle, boxShadow: waStatus === 'connected' ? `0 0 15px ${C.neonBorder}` : 'none', transition: 'all 0.2s' }}>
-                    <Send size={15} /> {isSending ? t('dashboard.sending', 'Enviando...') : t('dashboard.send')}
-                  </button>
                 </div>
               </div>
             </div>
@@ -614,7 +654,7 @@ export default function App() {
           {activeTab === 'services' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title="Serviços" subtitle="Status de todos os serviços integrados" />
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[
                   { name: 'Express Backend', st: status, detail: `Porta 3001 · ${pingMs || '?'}ms` },
                   { name: 'Supabase DB', st: 'Online', detail: `${githubEvents.length} registros` },
@@ -647,7 +687,7 @@ export default function App() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title="Contatos" subtitle="Integrações e agentes conectados" />
               <div style={card}>
-                {contacts.map((c, i) => {
+                {MOCK_CONTACTS.map((c, i) => {
                   const ok = c.status === 'active' || c.status === 'connected';
                   return (
                     <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1.25rem', borderBottom: `1px solid ${C.border}` }}>
@@ -675,8 +715,8 @@ export default function App() {
           {activeTab === 'stats' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title="Estatísticas" subtitle="Análise detalhada dos eventos e uso" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
-                <div style={{ ...card, padding: '1.25rem', height: '280px', display: 'flex', flexDirection: 'column' }}>
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div style={{ ...card, padding: '1.25rem', height: '280px', display: 'flex', flexDirection: 'column' }} className="flex-1">
                   <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>Eventos por Tipo</p>
                   <div style={{ flex: 1 }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -690,7 +730,7 @@ export default function App() {
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div style={{ ...card, padding: '1.25rem', height: '280px', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ ...card, padding: '1.25rem', height: '280px', display: 'flex', flexDirection: 'column' }} className="flex-1">
                   <p style={{ fontSize: '0.7rem', color: C.muted, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '1rem' }}>Tráfego Semanal</p>
                   <div style={{ flex: 1 }}>
                     <ResponsiveContainer width="100%" height="100%">
@@ -706,7 +746,7 @@ export default function App() {
                   </div>
                 </div>
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <StatCard label="Total Eventos" value={githubEvents.length} trendLabel="Salvo no Supabase" />
                 <StatCard label="Uptime Backend" value="99.9%" trendLabel="Últimas 24h" />
                 <StatCard label="Ping Médio" value={pingMs ? `${pingMs}ms` : '—'} trendLabel="Tempo de resposta" />
@@ -718,7 +758,7 @@ export default function App() {
           {activeTab === 'channels' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title="Canais" subtitle="Canais de comunicação e integração ativos" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {[
                   { name: 'GitHub Webhook', desc: 'Recebe eventos dos repositórios', active: true, Icon: Github },
                   { name: 'WhatsApp API', desc: 'Envio e recebimento de mensagens', active: waStatus === 'connected', Icon: MessageSquare },
@@ -748,12 +788,12 @@ export default function App() {
           {activeTab === 'endpoints' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               <SectionHeader title="Endpoints" subtitle="Todos os endpoints disponíveis na API" />
-              <div style={card}>
-                <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 80px', gap: '1rem', padding: '1rem', fontSize: '0.65rem', color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}` }}>
+              <div className="glass-panel overflow-x-auto">
+                <div style={{ minWidth: '500px', display: 'grid', gridTemplateColumns: '100px 1fr 1fr 80px', gap: '1rem', padding: '1rem', fontSize: '0.65rem', color: C.subtle, textTransform: 'uppercase', letterSpacing: '0.08em', borderBottom: `1px solid ${C.border}` }}>
                   <span>Método</span><span>Path</span><span>Descrição</span><span>Status</span>
                 </div>
-                {endpoints.map((ep, i) => (
-                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '100px 1fr 1fr 80px', gap: '1rem', padding: '1rem', alignItems: 'center', borderBottom: `1px solid ${C.border}` }}>
+                {MOCK_ENDPOINTS.map((ep, i) => (
+                  <div key={i} style={{ minWidth: '500px', display: 'grid', gridTemplateColumns: '100px 1fr 1fr 80px', gap: '1rem', padding: '1rem', alignItems: 'center', borderBottom: `1px solid ${C.border}` }}>
                     <span style={{ fontSize: '0.7rem', fontFamily: 'monospace', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', background: ep.method === 'GET' ? 'rgba(96,165,250,0.1)' : 'rgba(250,204,21,0.1)', color: ep.method === 'GET' ? C.blue : C.yellow, width: 'fit-content' }}>{ep.method}</span>
                     <span style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>{ep.path}</span>
                     <span style={{ fontSize: '0.875rem', color: C.muted }}>{ep.desc}</span>
