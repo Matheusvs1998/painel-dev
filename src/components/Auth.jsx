@@ -1,37 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Eye, EyeOff, ArrowLeft, RefreshCw, LogIn } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, Sparkles, ShieldCheck } from 'lucide-react';
 import Logo from './Logo';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-
-// ── Design tokens ──────────────────────────────
-const C = {
-  bg: 'var(--bg)',
-  card: 'var(--card)',
-  border: 'var(--border)',
-  hover: 'var(--hover)',
-  neon: 'var(--neon)',
-  neonDim: 'var(--neonDim)',
-  neonBorder: 'var(--neonBorder)',
-  muted: 'var(--muted)',
-  subtle: 'var(--subtle)',
-  red: 'var(--red)',
-  text: 'var(--text)',
-};
-
-const inputStyle = {
-  width: '100%',
-  padding: '0.75rem 1rem',
-  background: C.bg,
-  border: `1px solid ${C.border}`,
-  borderRadius: '0.5rem',
-  color: C.text,
-  fontFamily: 'Inter, sans-serif',
-  fontSize: '0.875rem',
-  outline: 'none',
-  transition: 'all 0.2s',
-  boxSizing: 'border-box'
-};
 
 export default function Auth() {
   // 'login' | 'signup' | 'verify_otp'
@@ -60,10 +32,10 @@ export default function Auth() {
         const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
 
-        // Se o Supabase exigir confirmação por e-mail (session null)
+        // Se o Supabase exigir confirmação por e-mail
         if (!data.session) {
           setAuthMode('verify_otp');
-          setSuccessMsg(`Enviamos um código de confirmação para ${email}. Digite os 6 dígitos abaixo:`);
+          setSuccessMsg(`Enviamos um token de segurança para ${email}. Digite os 6 dígitos abaixo:`);
           toast.info('Código enviado para seu e-mail!');
         } else {
           toast.success('Conta criada e autenticada com sucesso!');
@@ -88,14 +60,12 @@ export default function Auth() {
     setSuccessMsg(null);
 
     try {
-      // 1. Tenta validar como OTP de SignUp
       let res = await supabase.auth.verifyOtp({
         email,
         token: cleanToken,
         type: 'signup'
       });
 
-      // 2. Se falhar, tenta como OTP de Email
       if (res.error) {
         res = await supabase.auth.verifyOtp({
           email,
@@ -104,12 +74,10 @@ export default function Auth() {
         });
       }
 
-      // 3. Se ainda assim der erro mas tivermos a senha, tenta login direto
-      // (ocorre quando o usuário clicou no link do e-mail antes e o token já foi consumido)
       if (res.error && password) {
         const loginRes = await supabase.auth.signInWithPassword({ email, password });
         if (!loginRes.error) {
-          toast.success('Conta validada com sucesso!');
+          toast.success('Conta confirmada com sucesso!');
           return;
         }
       }
@@ -117,9 +85,9 @@ export default function Auth() {
       if (res.error) throw res.error;
       toast.success('Conta confirmada com sucesso! Bem-vindo ao DevSystem.');
     } catch (error) {
-      console.error('Erro na validação do token:', error);
+      console.error('Erro na validação:', error);
       if (error.message?.includes('expired') || error.message?.includes('invalid')) {
-        setErrorMsg('O token digitado é inválido ou expirou. Clique em "Reenviar código" ou tente fazer login direto se já clicou no link do e-mail.');
+        setErrorMsg('O token digitado é inválido ou expirou. Clique em "Reenviar código" ou tente entrar direto se já clicou no link.');
       } else {
         setErrorMsg(error.message);
       }
@@ -128,7 +96,7 @@ export default function Auth() {
     }
   };
 
-  // Tentar login direto se o usuário já clicou no link
+  // Tentar login direto
   const tryDirectLogin = async () => {
     if (!password) {
       setAuthMode('login');
@@ -141,7 +109,7 @@ export default function Auth() {
       if (error) throw error;
       toast.success('Login realizado com sucesso!');
     } catch (error) {
-      setErrorMsg('Não foi possível entrar direto. Por favor, reenvie o código.');
+      setErrorMsg('Não foi possível entrar direto. Por favor, reenvie o código ou verifique sua senha.');
     } finally {
       setLoading(false);
     }
@@ -183,244 +151,190 @@ export default function Auth() {
   };
 
   return (
-    <div style={{
-      width: '100vw', height: '100vh', background: C.bg, display: 'flex',
-      alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif'
-    }}>
-      <div style={{
-        background: C.card, padding: '2.5rem', borderRadius: '1.25rem',
-        border: `1px solid ${C.border}`, width: '100%', maxWidth: '420px',
-        boxShadow: `0 0 40px rgba(0,0,0,0.6)`
-      }}>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 bg-[#080d14] text-[var(--text)] font-sans overflow-hidden select-none">
+      {/* Elementos Decorativos de Fundo (Glow Orbs) */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[var(--neonDim)] rounded-full blur-[140px] pointer-events-none opacity-40"></div>
+      <div className="absolute -bottom-20 right-10 w-[350px] h-[350px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+      {/* Card Principal Glassmorphism */}
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.96, y: 15 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="relative z-10 w-full max-w-[430px] p-8 sm:p-10 rounded-3xl bg-[var(--card)]/90 backdrop-blur-2xl border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
+      >
         {/* Cabeçalho */}
-        <div style={{ textAlign: 'center', marginBottom: '1.75rem' }}>
-          <div style={{
-            width: '3.75rem', height: '3.75rem', background: C.bg, borderRadius: '1rem',
-            margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: `1px solid ${C.border}`,
-            boxShadow: `0 0 25px ${C.neonDim}`
-          }}>
-            <Logo size={34} />
-          </div>
-          <h1 style={{ margin: 0, color: C.text, fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>
+        <div className="text-center mb-8">
+          <motion.div 
+            whileHover={{ scale: 1.05, rotate: 2 }}
+            className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[var(--bg)] border border-[var(--neonBorder)] shadow-[0_0_25px_var(--neonDim)]"
+          >
+            <Logo size={36} />
+          </motion.div>
+          <h1 className="m-0 text-2xl font-black tracking-tight text-[var(--text)] flex items-center justify-center gap-2">
             DevSystem
           </h1>
-          <p style={{ margin: '0.4rem 0 0', color: C.muted, fontSize: '0.85rem' }}>
+          <p className="mt-1.5 text-xs text-[var(--muted)] tracking-wide">
             {authMode === 'verify_otp' 
-              ? 'Confirmação de Segurança' 
+              ? 'Verificação de Autenticidade' 
               : authMode === 'signup' 
-                ? 'Crie sua nova conta de desenvolvedor' 
-                : 'Faça login na sua conta'}
+                ? 'Crie sua conta no ecossistema de desenvolvimento' 
+                : 'Painel de Controle & Monitoramento em Tempo Real'}
           </p>
         </div>
 
-        {/* Mensagens de Feedback */}
-        {errorMsg && (
-          <div style={{ background: 'rgba(248,113,113,0.1)', border: `1px solid ${C.red}`, color: C.red, padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', textAlign: 'center', lineHeight: '1.4' }}>
-            {errorMsg}
-          </div>
-        )}
+        {/* Mensagens de Alerta e Sucesso */}
+        <AnimatePresence>
+          {errorMsg && (
+            <motion.div 
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs text-center leading-relaxed"
+            >
+              {errorMsg}
+            </motion.div>
+          )}
 
-        {successMsg && (
-          <div style={{ background: C.neonDim, border: `1px solid ${C.neonBorder}`, color: C.neon, padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', textAlign: 'center', lineHeight: '1.4' }}>
-            {successMsg}
-          </div>
-        )}
+          {successMsg && (
+            <motion.div 
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mb-4 p-3 rounded-xl bg-[var(--neonDim)] border border-[var(--neonBorder)] text-[var(--neon)] text-xs text-center leading-relaxed font-medium"
+            >
+              {successMsg}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* TELA DE VERIFICAÇÃO DE TOKEN OTP */}
+        {/* MODO DE VERIFICAÇÃO DE TOKEN OTP */}
         {authMode === 'verify_otp' ? (
-          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
             <div>
-              <label style={{ display: 'block', color: C.muted, fontSize: '0.75rem', marginBottom: '0.375rem' }}>
-                Token de 6 dígitos recebido por e-mail:
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-2">
+                Código de 6 dígitos recebido:
               </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  type="text"
-                  maxLength={6}
-                  value={otpToken}
-                  onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ''))}
-                  required
-                  autoFocus
-                  style={{
-                    ...inputStyle,
-                    letterSpacing: '8px',
-                    fontSize: '1.25rem',
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    color: C.neon,
-                    fontFamily: 'monospace'
-                  }}
-                  placeholder="123456"
-                />
-              </div>
+              <input
+                type="text"
+                maxLength={6}
+                value={otpToken}
+                onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ''))}
+                required
+                autoFocus
+                placeholder="000000"
+                className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_20px_var(--neonDim)] rounded-xl py-3.5 text-center text-2xl font-mono font-bold tracking-[0.5em] text-[var(--neon)] outline-none transition-all"
+              />
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              style={{
-                marginTop: '0.5rem',
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: C.neon,
-                color: C.bg,
-                fontWeight: '700',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-                transition: 'all 0.2s',
-                boxShadow: `0 0 15px ${C.neonDim}`
-              }}
+              className="mt-2 w-full py-3.5 rounded-xl bg-[var(--neon)] text-[var(--bg)] font-black text-sm tracking-wide shadow-[0_0_20px_var(--neonDim)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? 'Validando token...' : 'Confirmar Token & Entrar'}
-            </button>
+              {loading ? 'Validando código...' : 'Confirmar & Entrar'}
+            </motion.button>
 
             <button
               type="button"
               onClick={tryDirectLogin}
               disabled={loading}
-              style={{
-                padding: '0.65rem',
-                borderRadius: '0.5rem',
-                border: `1px solid ${C.border}`,
-                background: C.bg,
-                color: C.text,
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px'
-              }}
+              className="w-full py-2.5 rounded-xl bg-[var(--hover)] hover:bg-[var(--neonDim)] text-[var(--text)] hover:text-[var(--neon)] border border-[var(--border)] text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
               <LogIn size={14} /> Já cliquei no link do e-mail (Entrar Direto)
             </button>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
+            <div className="flex items-center justify-between mt-2 pt-2 border-t border-[var(--border)]">
               <button
                 type="button"
                 onClick={handleResendOtp}
                 disabled={loading}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: C.neon,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
+                className="bg-transparent border-none text-xs font-medium text-[var(--neon)] hover:underline flex items-center gap-1.5 cursor-pointer p-0"
               >
-                <RefreshCw size={12} /> Reenviar novo código
+                <RefreshCw size={13} /> Reenviar novo código
               </button>
 
               <button
                 type="button"
-                onClick={() => setAuthMode('login')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: C.muted,
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
+                onClick={() => {
+                  setAuthMode('login');
+                  setErrorMsg(null);
+                  setSuccessMsg(null);
                 }}
+                className="bg-transparent border-none text-xs text-[var(--muted)] hover:text-[var(--text)] flex items-center gap-1 cursor-pointer p-0 transition-colors"
               >
-                <ArrowLeft size={12} /> Voltar ao login
+                <ArrowLeft size={13} /> Voltar ao login
               </button>
             </div>
           </form>
         ) : (
-          /* TELA DE LOGIN / CADASTRO */
-          <form onSubmit={handleAuth} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          /* MODO DE LOGIN / CADASTRO */
+          <form onSubmit={handleAuth} className="flex flex-col gap-4">
             <div>
-              <label style={{ display: 'block', color: C.muted, fontSize: '0.75rem', marginBottom: '0.375rem' }}>E-mail</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                style={inputStyle}
-                placeholder="seu@email.com"
-              />
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+                E-mail
+              </label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="seu.email@empresa.com"
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--text)] outline-none transition-all"
+                />
+              </div>
             </div>
-            
+
             <div>
-              <label style={{ display: 'block', color: C.muted, fontSize: '0.75rem', marginBottom: '0.375rem' }}>Senha</label>
-              <div style={{ position: 'relative' }}>
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+                Senha
+              </label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" />
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  style={{ ...inputStyle, paddingRight: '2.5rem' }}
-                  placeholder="••••••••"
+                  placeholder="••••••••••••"
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--text)] outline-none transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', color: C.subtle, cursor: 'pointer', padding: 0, display: 'flex'
-                  }}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)] hover:text-[var(--text)] bg-transparent border-none cursor-pointer p-0"
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              style={{
-                marginTop: '0.5rem',
-                padding: '0.75rem',
-                borderRadius: '0.5rem',
-                border: 'none',
-                background: C.neon,
-                color: C.bg,
-                fontWeight: '700',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1,
-                transition: 'all 0.2s',
-                boxShadow: `0 0 15px ${C.neonDim}`
-              }}
+              className="mt-2 w-full py-3 rounded-xl bg-[var(--neon)] text-[var(--bg)] font-black text-xs uppercase tracking-wider shadow-[0_0_20px_var(--neonDim)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
-              {loading ? 'Aguarde...' : (authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta')}
-            </button>
+              {loading ? 'Processando...' : (authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta')}
+            </motion.button>
 
             {/* Divisor */}
-            <div style={{ display: 'flex', alignItems: 'center', margin: '0.5rem 0', gap: '0.5rem' }}>
-              <div style={{ flex: 1, height: '1px', background: C.border }}></div>
-              <span style={{ fontSize: '0.7rem', color: C.subtle, textTransform: 'uppercase' }}>ou</span>
-              <div style={{ flex: 1, height: '1px', background: C.border }}></div>
+            <div className="flex items-center gap-3 my-1">
+              <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
+              <span className="text-[10px] uppercase tracking-widest text-[var(--subtle)] font-bold">ou</span>
+              <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
             </div>
 
-            {/* Botão Login com Google */}
+            {/* Botão Oficial do Google */}
             <button
               type="button"
               onClick={handleGoogleLogin}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                padding: '0.65rem',
-                borderRadius: '0.5rem',
-                background: C.bg,
-                border: `1px solid ${C.border}`,
-                color: C.text,
-                fontSize: '0.8rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }}
-              className="hover:border-[var(--neonBorder)]"
+              className="w-full py-2.5 px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs font-semibold text-[var(--text)] flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -431,8 +345,8 @@ export default function Auth() {
               Continuar com Google
             </button>
 
-            {/* Alternar entre Login e Cadastro */}
-            <div style={{ marginTop: '0.75rem', textAlign: 'center' }}>
+            {/* Alternância Elegante (Sem sublinhado feio de browser) */}
+            <div className="mt-3 pt-3 border-t border-[var(--border)] text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -440,21 +354,18 @@ export default function Auth() {
                   setErrorMsg(null);
                   setSuccessMsg(null);
                 }}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: C.muted,
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  textDecoration: 'underline'
-                }}
+                className="bg-transparent border-none text-xs text-[var(--muted)] hover:text-[var(--text)] transition-colors cursor-pointer"
               >
-                {authMode === 'login' ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça Login'}
+                {authMode === 'login' ? (
+                  <span>Não possui uma conta? <strong className="text-[var(--neon)] font-bold ml-1 hover:underline">Cadastre-se gratuitamente</strong></span>
+                ) : (
+                  <span>Já possui cadastro? <strong className="text-[var(--neon)] font-bold ml-1 hover:underline">Fazer Login</strong></span>
+                )}
               </button>
             </div>
           </form>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
