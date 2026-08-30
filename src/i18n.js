@@ -11,9 +11,8 @@ const resources = {
         overview: 'Overview',
         integrations: 'Integrations',
         github: 'GitHub',
-        whatsapp: 'WhatsApp',
         services: 'Services',
-        contacts: 'Contacts',
+        contacts: 'Agents & Integrations',
         analytics: 'Analytics',
         stats: 'Statistics',
         channels: 'Channels',
@@ -21,7 +20,7 @@ const resources = {
         reports: 'Reports'
       },
       header: {
-        searchPlaceholder: 'Search here...',
+        searchPlaceholder: 'Search anything...',
         backendStatus: 'Backend',
         checking: 'Checking...',
         online: 'Online',
@@ -29,57 +28,19 @@ const resources = {
         language: 'Language'
       },
       sidebar: {
-        devSystem: 'Dev System',
-        version: 'Ver. 1.0.0'
-      },
-      messages: {
-        fillFields: 'Fill in number and message!',
-        sentSuccess: '✅ Message sent!',
-        errorPrefix: 'Error: ',
-        reqError: 'Request error.'
+        devSystem: 'DevSystem Pro',
+        version: 'v1.2.0 • Active'
       },
       dashboard: {
-        inboxMsg1: 'New push event received',
-        inboxMsg2: 'Backend started successfully',
-        inboxMsg3: 'QR Code generated, waiting for scan',
-        alertMsg1: 'WhatsApp disconnected — reconnect the bot',
-        alertMsg2: 'Supabase: 0 vulnerabilities detected',
-        alertMsg3: 'New endpoint /api/status available',
+        overviewSubtitle: 'Real-time overview of your development ecosystem',
+        githubEvents: 'GitHub Events',
+        thisWeek: 'Total accumulated',
+        eventsPerDay: 'Event Flow by Day',
+        dbStatus: 'Database Status',
+        supabaseConnected: 'Supabase Connected',
         days: {
           mon: 'Mon', tue: 'Tue', wed: 'Wed', thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun'
-        },
-        endpoints: {
-          serverStatus: 'Server status',
-          waStatus: 'WhatsApp status',
-          sendMsg: 'Send message',
-          listGithub: 'List GitHub events',
-          receiveGithub: 'Receive GitHub webhook'
-        },
-        overviewSubtitle: 'Real-time overview of your system',
-        githubEvents: 'GitHub Events',
-        thisWeek: '+12.5% this week',
-        stable: 'Stable',
-        failed: 'Failed',
-        connected: 'Connected',
-        disconnected: 'Disconnected',
-        lastMeasurement: 'Last measurement',
-        eventsPerDay: 'Events per day (simulated)',
-        basedOnConnection: 'Based on connection',
-        dbStatus: 'DB Status',
-        supabaseConnected: 'Supabase Connected',
-        recordsSaved: 'records saved',
-        latestEvents: 'Latest Events',
-        seeAll: 'See all',
-        noEvents: 'No events received.',
-        unreadMessages: 'unread messages',
-        ago: 'ago',
-        systemAlerts: 'System notifications and alerts',
-        noAlerts: 'No alerts at the moment',
-        sendWebhook: 'Send Webhook (Simulate)',
-        numberExample: 'Number (Ex: 551199999999)',
-        message: 'Message',
-        send: 'Send',
-        scanQrCode: 'Scan the QR Code to connect'
+        }
       }
     }
   },
@@ -91,9 +52,8 @@ const resources = {
         overview: 'Visão Geral',
         integrations: 'Integrações',
         github: 'GitHub',
-        whatsapp: 'WhatsApp',
         services: 'Serviços',
-        contacts: 'Contatos',
+        contacts: 'Agentes & Integrações',
         analytics: 'Analytics',
         stats: 'Estatísticas',
         channels: 'Canais',
@@ -101,7 +61,7 @@ const resources = {
         reports: 'Relatórios'
       },
       header: {
-        searchPlaceholder: 'Buscar aqui...',
+        searchPlaceholder: 'Buscar no sistema...',
         backendStatus: 'Backend',
         checking: 'Verificando...',
         online: 'Online',
@@ -109,57 +69,19 @@ const resources = {
         language: 'Idioma'
       },
       sidebar: {
-        devSystem: 'Dev System',
-        version: 'Ver. 1.0.0'
-      },
-      messages: {
-        fillFields: 'Preencha número e mensagem!',
-        sentSuccess: '✅ Mensagem enviada!',
-        errorPrefix: 'Erro: ',
-        reqError: 'Erro na requisição.'
+        devSystem: 'DevSystem Pro',
+        version: 'v1.2.0 • Ativo'
       },
       dashboard: {
-        inboxMsg1: 'Novo push event recebido',
-        inboxMsg2: 'Backend iniciado com sucesso',
-        inboxMsg3: 'QR Code gerado, aguardando scan',
-        alertMsg1: 'WhatsApp desconectado — reconecte o bot',
-        alertMsg2: 'Supabase: 0 vulnerabilidades detectadas',
-        alertMsg3: 'Novo endpoint /api/status disponível',
-        days: {
-          mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sab', sun: 'Dom'
-        },
-        endpoints: {
-          serverStatus: 'Status do servidor',
-          waStatus: 'Status do WhatsApp',
-          sendMsg: 'Enviar mensagem',
-          listGithub: 'Listar eventos GitHub',
-          receiveGithub: 'Receber webhook GitHub'
-        },
-        overviewSubtitle: 'Visão geral em tempo real do seu sistema',
+        overviewSubtitle: 'Visão geral em tempo real do ecossistema de desenvolvimento',
         githubEvents: 'Eventos GitHub',
-        thisWeek: '+12.5% esta semana',
-        stable: 'Estável',
-        failed: 'Falha',
-        connected: 'Conectado',
-        disconnected: 'Desconectado',
-        lastMeasurement: 'Última medição',
-        eventsPerDay: 'Eventos por dia (simulado)',
-        basedOnConnection: 'Baseado na conexão',
-        dbStatus: 'Status DB',
+        thisWeek: 'Total acumulado',
+        eventsPerDay: 'Fluxo de Eventos por Dia',
+        dbStatus: 'Status do Banco',
         supabaseConnected: 'Supabase Conectado',
-        recordsSaved: 'registros salvos',
-        latestEvents: 'Últimos Eventos',
-        seeAll: 'Ver todos',
-        noEvents: 'Nenhum evento recebido.',
-        unreadMessages: 'mensagens não lidas',
-        ago: 'atrás',
-        systemAlerts: 'Notificações e alertas do sistema',
-        noAlerts: 'Sem alertas no momento',
-        sendWebhook: 'Enviar Webhook (Simular)',
-        numberExample: 'Número (Ex: 551199999999)',
-        message: 'Mensagem',
-        send: 'Enviar',
-        scanQrCode: 'Escaneie o QR Code para conectar'
+        days: {
+          mon: 'Seg', tue: 'Ter', wed: 'Qua', thu: 'Qui', fri: 'Sex', sat: 'Sáb', sun: 'Dom'
+        }
       }
     }
   }

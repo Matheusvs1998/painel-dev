@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import ProfileModal from '../components/ProfileModal';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { fetchApiStatus } from '../lib/api';
 
 export default function AppLayout({ session }) {
   const { t } = useTranslation();
@@ -19,12 +20,7 @@ export default function AppLayout({ session }) {
 
   const { data: statusData } = useQuery({
     queryKey: ['status'],
-    queryFn: async () => {
-      const t0 = Date.now();
-      const res = await fetch('http://localhost:3001/api/status');
-      const data = await res.json();
-      return { status: data.status, pingMs: Date.now() - t0 };
-    },
+    queryFn: fetchApiStatus,
     refetchInterval: 5000,
   });
 

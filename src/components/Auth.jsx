@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Eye, EyeOff } from 'lucide-react';
+import Logo from './Logo';
 
-// ── Design tokens (matching App.jsx) ──────────────────────────────
+// ── Design tokens ──────────────────────────────
 const C = {
   bg: 'var(--bg)',
   card: 'var(--card)',
@@ -68,23 +69,24 @@ export default function Auth() {
       alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif'
     }}>
       <div style={{
-        background: C.card, padding: '2rem', borderRadius: '1rem',
-        border: `1px solid ${C.border}`, width: '100%', maxWidth: '400px',
-        boxShadow: `0 0 20px rgba(0,0,0,0.5)`
+        background: C.card, padding: '2.5rem', borderRadius: '1.25rem',
+        border: `1px solid ${C.border}`, width: '100%', maxWidth: '420px',
+        boxShadow: `0 0 40px rgba(0,0,0,0.6)`
       }}>
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{
-            width: '3rem', height: '3rem', background: C.neon, borderRadius: '0.75rem',
-            margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: `0 0 20px ${C.neonBorder}`
+            width: '4rem', height: '4rem', background: C.bg, borderRadius: '1rem',
+            margin: '0 auto 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            border: `1px solid ${C.border}`,
+            boxShadow: `0 0 25px ${C.neonDim}`
           }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.bg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
-            </svg>
+            <Logo size={36} />
           </div>
-          <h1 style={{ margin: 0, color: C.text, fontSize: '1.5rem', fontWeight: 'bold' }}>DevSystem</h1>
+          <h1 style={{ margin: 0, color: C.text, fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>
+            DevSystem
+          </h1>
           <p style={{ margin: '0.5rem 0 0', color: C.muted, fontSize: '0.875rem' }}>
-            {isLogin ? 'Faça login na sua conta' : 'Crie sua nova conta'}
+            {isLogin ? 'Faça login na sua conta' : 'Crie sua nova conta de desenvolvedor'}
           </p>
         </div>
 
@@ -150,7 +152,8 @@ export default function Auth() {
               fontWeight: '600',
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.7 : 1,
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
+              boxShadow: `0 0 15px ${C.neonDim}`
             }}
           >
             {loading ? 'Aguarde...' : (isLogin ? 'Entrar no Sistema' : 'Criar Conta')}
