@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Eye, EyeOff, KeyRound, Mail, ArrowLeft, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, RefreshCw, LogIn } from 'lucide-react';
 import Logo from './Logo';
 import { toast } from 'sonner';
 
@@ -34,7 +34,7 @@ const inputStyle = {
 };
 
 export default function Auth() {
-  // 'login' | 'signup' | 'verify_otp' | 'forgot_password'
+  // 'login' | 'signup' | 'verify_otp'
   const [authMode, setAuthMode] = useState('login');
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -63,8 +63,8 @@ export default function Auth() {
         // Se o Supabase exigir confirmação por e-mail (session null)
         if (!data.session) {
           setAuthMode('verify_otp');
-          setSuccessMsg(`Enviamos um token de confirmação para ${email}. Digite o código abaixo para ativar sua conta:`);
-          toast.info('Código de confirmação enviado para seu e-mail!');
+          setSuccessMsg(`Enviamos um código de confirmação para ${email}. Digite os 6 dígitos abaixo:`);
+          toast.info('Código enviado para seu e-mail!');
         } else {
           toast.success('Conta criada e autenticada com sucesso!');
         }
@@ -79,7 +79,8 @@ export default function Auth() {
   // Verificação de Token OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!otpToken || otpToken.length < 6) {
+    const cleanToken = otpToken.trim();
+    if (!cleanToken || cleanToken.length < 6) {
       return setErrorMsg('Digite o token completo de 6 dígitos recebido por e-mail.');
     }
     setLoading(true);
@@ -87,16 +88,60 @@ export default function Auth() {
     setSuccessMsg(null);
 
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
+      // 1. Tenta validar como OTP de SignUp
+      let res = await supabase.auth.verifyOtp({
         email,
-        token: otpToken.trim(),
+        token: cleanToken,
         type: 'signup'
       });
 
-      if (error) throw error;
-      toast.success('Conta confirmada com sucesso! Bem-vindo.');
+      // 2. Se falhar, tenta como OTP de Email
+      if (res.error) {
+        res = await supabase.auth.verifyOtp({
+          email,
+          token: cleanToken,
+          type: 'email'
+        });
+      }
+
+      // 3. Se ainda assim der erro mas tivermos a senha, tenta login direto
+      // (ocorre quando o usuário clicou no link do e-mail antes e o token já foi consumido)
+      if (res.error && password) {
+        const loginRes = await supabase.auth.signInWithPassword({ email, password });
+        if (!loginRes.error) {
+          toast.success('Conta validada com sucesso!');
+          return;
+        }
+      }
+
+      if (res.error) throw res.error;
+      toast.success('Conta confirmada com sucesso! Bem-vindo ao DevSystem.');
     } catch (error) {
-      setErrorMsg(error.message || 'Token inválido ou expirado.');
+      console.error('Erro na validação do token:', error);
+      if (error.message?.includes('expired') || error.message?.includes('invalid')) {
+        setErrorMsg('O token digitado é inválido ou expirou. Clique em "Reenviar código" ou tente fazer login direto se já clicou no link do e-mail.');
+      } else {
+        setErrorMsg(error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Tentar login direto se o usuário já clicou no link
+  const tryDirectLogin = async () => {
+    if (!password) {
+      setAuthMode('login');
+      return;
+    }
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast.success('Login realizado com sucesso!');
+    } catch (error) {
+      setErrorMsg('Não foi possível entrar direto. Por favor, reenvie o código.');
     } finally {
       setLoading(false);
     }
@@ -112,8 +157,9 @@ export default function Auth() {
         email
       });
       if (error) throw error;
-      toast.success('Novo código de confirmação reenviado!');
-      setSuccessMsg(`Reenviamos um novo código para ${email}.`);
+      setOtpToken('');
+      toast.success('Novo código de confirmação enviado!');
+      setSuccessMsg(`Um novo código de 6 dígitos foi enviado para ${email}.`);
     } catch (error) {
       setErrorMsg(error.message);
     } finally {
@@ -170,7 +216,7 @@ export default function Auth() {
 
         {/* Mensagens de Feedback */}
         {errorMsg && (
-          <div style={{ background: 'rgba(248,113,113,0.1)', border: `1px solid ${C.red}`, color: C.red, padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', textAlign: 'center' }}>
+          <div style={{ background: 'rgba(248,113,113,0.1)', border: `1px solid ${C.red}`, color: C.red, padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.8rem', marginBottom: '1rem', textAlign: 'center', lineHeight: '1.4' }}>
             {errorMsg}
           </div>
         )}
@@ -230,6 +276,28 @@ export default function Auth() {
               {loading ? 'Validando token...' : 'Confirmar Token & Entrar'}
             </button>
 
+            <button
+              type="button"
+              onClick={tryDirectLogin}
+              disabled={loading}
+              style={{
+                padding: '0.65rem',
+                borderRadius: '0.5rem',
+                border: `1px solid ${C.border}`,
+                background: C.bg,
+                color: C.text,
+                fontSize: '0.8rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px'
+              }}
+            >
+              <LogIn size={14} /> Já cliquei no link do e-mail (Entrar Direto)
+            </button>
+
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem' }}>
               <button
                 type="button"
@@ -246,7 +314,7 @@ export default function Auth() {
                   gap: '4px'
                 }}
               >
-                <RefreshCw size={12} /> Reenviar código
+                <RefreshCw size={12} /> Reenviar novo código
               </button>
 
               <button
