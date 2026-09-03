@@ -52,6 +52,8 @@ export default function App() {
   useEffect(() => {
     if (!session) return;
 
+    const currentAuthor = (session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '').toLowerCase();
+
     const channel = supabase
       .channel('github_events_realtime')
       .on(
@@ -59,6 +61,15 @@ export default function App() {
         { event: 'INSERT', schema: 'public', table: 'github_events' },
         (payload) => {
           const newEvent = payload.new;
+          
+          // Isolamento: só notifica se o evento for do perfil logado
+          const matchesUser = newEvent.user_id && newEvent.user_id === session.user.id;
+          const matchesAuthor = currentAuthor && newEvent.sender && newEvent.sender.toLowerCase().includes(currentAuthor);
+
+          if (!matchesUser && !matchesAuthor && newEvent.user_id) {
+            return;
+          }
+
           toast.success(
             `🚀 GitHub: Novo evento "${newEvent.event_type || 'push'}" recebido!`,
             {
