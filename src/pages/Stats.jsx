@@ -35,11 +35,11 @@ export default function Stats() {
   const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
 
   const [period, setPeriod] = useState('all'); // '24h' | '7d' | '30d' | 'all'
-  const [selectedRepo, setSelectedRepo] = useState('all');
+  const connectedRepo = session?.user?.user_metadata?.github_repo || 'Matheusvs1998/painel-dev';
 
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents', userId],
-    queryFn: () => fetchGithubEvents(userId, currentAuthor),
+    queryKey: ['githubEvents', userId, connectedRepo],
+    queryFn: () => fetchGithubEvents({ userId, sender: currentAuthor, repo: connectedRepo }),
     refetchInterval: 5000
   });
 

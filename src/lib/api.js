@@ -19,11 +19,21 @@ export async function fetchApiStatus() {
   }
 }
 
-export async function fetchGithubEvents(userId, sender) {
+export async function fetchGithubEvents(firstArg, senderArg, repoArg, githubUserArg) {
   try {
     const params = new URLSearchParams();
-    if (userId) params.append('user_id', userId);
-    if (sender) params.append('sender', sender);
+    if (typeof firstArg === 'object' && firstArg !== null) {
+      const { userId, sender, repo, githubUser } = firstArg;
+      if (userId) params.append('user_id', userId);
+      if (sender) params.append('sender', sender);
+      if (repo) params.append('repo', repo);
+      if (githubUser) params.append('github_user', githubUser);
+    } else {
+      if (firstArg) params.append('user_id', firstArg);
+      if (senderArg) params.append('sender', senderArg);
+      if (repoArg) params.append('repo', repoArg);
+      if (githubUserArg) params.append('github_user', githubUserArg);
+    }
     const qs = params.toString() ? `?${params.toString()}` : '';
     const res = await fetch(`${API_BASE}/api/webhooks/github/events${qs}`);
     if (!res.ok) throw new Error('Falha ao buscar eventos do GitHub');
