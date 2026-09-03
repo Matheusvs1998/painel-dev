@@ -30,4 +30,19 @@ export async function fetchGithubEvents() {
   }
 }
 
+export async function simulateGithubEvent(payload = {}) {
+  try {
+    const res = await fetch(`${API_BASE}/api/webhooks/github/simulate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Falha ao simular evento');
+    return await res.json();
+  } catch (error) {
+    console.error('[API] Erro ao simular evento:', error);
+    throw error;
+  }
+}
+
 export { API_BASE };
