@@ -26,7 +26,13 @@ const C = {
 const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius: '1rem' };
 const TOOLTIP_STYLE = { backgroundColor: C.card, borderColor: C.border, borderRadius: '8px', fontSize: 12, color: '#fff' };
 
+import { useOutletContext } from 'react-router-dom';
+
 export default function Overview() {
+  const { session } = useOutletContext() || {};
+  const userId = session?.user?.id || '';
+  const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
+
   const { t } = useTranslation();
   const [period, setPeriod] = useState('all'); // '24h' | '7d' | '30d' | 'all'
   const [selectedRepo, setSelectedRepo] = useState('all');
@@ -39,8 +45,8 @@ export default function Overview() {
   });
 
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents'],
-    queryFn: fetchGithubEvents,
+    queryKey: ['githubEvents', userId],
+    queryFn: () => fetchGithubEvents(userId, currentAuthor),
     refetchInterval: 5000
   });
 

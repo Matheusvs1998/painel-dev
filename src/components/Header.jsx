@@ -28,9 +28,12 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchRef = useRef(null);
 
+  const userId = session?.user?.id || '';
+  const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
+
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents'],
-    queryFn: fetchGithubEvents,
+    queryKey: ['githubEvents', userId],
+    queryFn: () => fetchGithubEvents(userId, currentAuthor),
     refetchInterval: 5000
   });
 

@@ -42,7 +42,7 @@ export default function AppLayout({ session }) {
         />
         
         <div className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-          <Outlet />
+          <Outlet context={{ session }} />
         </div>
       </main>
 
