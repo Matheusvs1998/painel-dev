@@ -172,8 +172,8 @@ export default function Overview() {
               className="bg-[#0b0f17] border border-[var(--border)] text-xs text-[var(--neon)] py-1.5 px-3 rounded-xl outline-none cursor-pointer w-full md:w-auto font-mono focus:border-[var(--neon)] shadow-sm [&>option]:bg-[#0f172a] [&>option]:text-[#f8fafc]"
             >
               <option value="all">Todos os Repositórios ({uniqueReposList.length})</option>
-              {uniqueReposList.map(r => (
-                <option key={r} value={r}>{r}</option>
+              {uniqueReposList.map((r, idx) => (
+                <option key={`repo-${r}-${idx}`} value={r}>{r}</option>
               ))}
             </select>
           </div>
