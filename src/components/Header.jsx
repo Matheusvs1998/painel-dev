@@ -229,15 +229,14 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
           {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        <select
-          value={i18n.language}
-          onChange={(e) => i18n.changeLanguage(e.target.value)}
-          style={inputStyle}
-          className="py-1.5 px-2 rounded-lg cursor-pointer text-xs"
+        <button
+          onClick={() => i18n.changeLanguage(i18n.language === 'pt' ? 'en' : 'pt')}
+          className="bg-[var(--card)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] rounded-lg py-1.5 px-2.5 cursor-pointer text-xs font-semibold text-[var(--text)] flex items-center gap-1.5 transition-all shadow-sm"
+          title="Alternar Idioma (PT / EN)"
         >
-          <option value="pt">PT-BR</option>
-          <option value="en">EN-US</option>
-        </select>
+          <span className="text-sm leading-none">{i18n.language === 'pt' ? '🇧🇷' : '🇺🇸'}</span>
+          <span className="font-mono text-[11px] text-[var(--neon)] font-bold uppercase">{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
+        </button>
       </div>
     </header>
   );

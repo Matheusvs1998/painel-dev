@@ -254,48 +254,84 @@ export default function ProfileModal({ session, onClose }) {
             </>
           ) : (
             <>
-              {/* Aba Preferências */}
+              {/* Aba Preferências com Segmented Controls Modernos no lugar de selects feios */}
               <div className="flex flex-col gap-4">
-                {/* Tema */}
-                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                {/* Tema com Botoes Estilizados */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-2xl border border-[var(--border)]">
                   <div className="flex items-center gap-3">
                     {themePref === 'dark' ? <Moon size={18} className="text-[var(--neon)]" /> : <Sun size={18} className="text-amber-400" />}
                     <div>
-                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Tema Visual Padrão</p>
-                      <p className="text-[10px] text-[var(--subtle)] m-0">Alternar entre Dark Mode e Light Mode</p>
+                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Tema Visual</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Aparência do sistema</p>
                     </div>
                   </div>
-                  <select
-                    value={themePref}
-                    onChange={(e) => setThemePref(e.target.value)}
-                    className="bg-[var(--bg)] border border-[var(--border)] text-xs text-[var(--text)] py-1.5 px-3 rounded-lg outline-none cursor-pointer"
-                  >
-                    <option value="dark">Escuro (Dark Neon)</option>
-                    <option value="light">Claro (Light)</option>
-                  </select>
+                  
+                  {/* Segmented Control Neon */}
+                  <div className="flex bg-[var(--bg)] p-1 rounded-xl border border-[var(--border)] gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setThemePref('dark')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        themePref === 'dark'
+                          ? 'bg-[var(--neonDim)] text-[var(--neon)] border-[var(--neonBorder)] shadow-[0_0_10px_var(--neonDim)]'
+                          : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+                      }`}
+                    >
+                      <Moon size={12} /> Escuro
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setThemePref('light')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        themePref === 'light'
+                          ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+                          : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+                      }`}
+                    >
+                      <Sun size={12} /> Claro
+                    </button>
+                  </div>
                 </div>
 
-                {/* Idioma */}
-                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                {/* Idioma com Botoes Estilizados */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-2xl border border-[var(--border)]">
                   <div className="flex items-center gap-3">
                     <Globe size={18} className="text-[var(--neon)]" />
                     <div>
                       <p className="text-xs font-semibold m-0 text-[var(--text)]">Idioma do Painel</p>
-                      <p className="text-[10px] text-[var(--subtle)] m-0">Português Brasileiro ou Inglês</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Linguagem da interface</p>
                     </div>
                   </div>
-                  <select
-                    value={langPref}
-                    onChange={(e) => setLangPref(e.target.value)}
-                    className="bg-[var(--bg)] border border-[var(--border)] text-xs text-[var(--text)] py-1.5 px-3 rounded-lg outline-none cursor-pointer"
-                  >
-                    <option value="pt">Português (PT-BR)</option>
-                    <option value="en">English (EN-US)</option>
-                  </select>
+
+                  {/* Segmented Control Neon */}
+                  <div className="flex bg-[var(--bg)] p-1 rounded-xl border border-[var(--border)] gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setLangPref('pt')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        langPref === 'pt'
+                          ? 'bg-[var(--neonDim)] text-[var(--neon)] border-[var(--neonBorder)] shadow-[0_0_10px_var(--neonDim)]'
+                          : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+                      }`}
+                    >
+                      🇧🇷 PT-BR
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLangPref('en')}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                        langPref === 'en'
+                          ? 'bg-[var(--neonDim)] text-[var(--neon)] border-[var(--neonBorder)] shadow-[0_0_10px_var(--neonDim)]'
+                          : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+                      }`}
+                    >
+                      🇺🇸 EN-US
+                    </button>
+                  </div>
                 </div>
 
                 {/* Notificações em Tempo Real */}
-                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-2xl border border-[var(--border)]">
                   <div className="flex items-center gap-3">
                     <Bell size={18} className="text-[var(--neon)]" />
                     <div>
@@ -312,7 +348,7 @@ export default function ProfileModal({ session, onClose }) {
                 </div>
 
                 {/* Alertas Críticos */}
-                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-2xl border border-[var(--border)]">
                   <div className="flex items-center gap-3">
                     <Shield size={18} className="text-emerald-400" />
                     <div>
