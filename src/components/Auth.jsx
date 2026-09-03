@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, Sparkles, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, CheckCircle2, AlertCircle } from 'lucide-react';
 import Logo from './Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -11,17 +11,30 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [otpToken, setOtpToken] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  // Login ou Cadastro
+  // Login ou Cadastro com Validação de Senha Idêntica
   const handleAuth = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setErrorMsg(null);
     setSuccessMsg(null);
+
+    // Validação estrita de senhas no modo de cadastro
+    if (authMode === 'signup') {
+      if (password.length < 6) {
+        return setErrorMsg('A senha deve conter pelo menos 6 caracteres.');
+      }
+      if (password !== confirmPassword) {
+        return setErrorMsg('As senhas não coincidem. Digite a mesma senha nos dois campos para confirmar.');
+      }
+    }
+
+    setLoading(true);
 
     try {
       if (authMode === 'login') {
@@ -149,6 +162,10 @@ export default function Auth() {
       toast.error('Erro ao conectar com Google: ' + error.message);
     }
   };
+
+  // Status de correspondência de senhas em tempo real
+  const passwordsMatch = confirmPassword && password === confirmPassword;
+  const passwordsMismatch = confirmPassword && password !== confirmPassword;
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center p-4 bg-[#080d14] text-[var(--text)] font-sans overflow-hidden select-none">
@@ -289,6 +306,7 @@ export default function Auth() {
               </div>
             </div>
 
+            {/* Campo de Senha */}
             <div>
               <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
                 Senha
@@ -312,6 +330,56 @@ export default function Auth() {
                 </button>
               </div>
             </div>
+
+            {/* Campo CONFIRMAR SENHA (Somente no Cadastro) */}
+            {authMode === 'signup' && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)]">
+                    Confirmar Senha
+                  </label>
+                  {passwordsMatch && (
+                    <span className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+                      <CheckCircle2 size={12} /> Senhas conferem
+                    </span>
+                  )}
+                  {passwordsMismatch && (
+                    <span className="text-[10px] text-red-400 font-medium flex items-center gap-1">
+                      <AlertCircle size={12} /> Senhas diferentes
+                    </span>
+                  )}
+                </div>
+                <div className="relative">
+                  <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Repita sua senha exatamente"
+                    className={`w-full bg-[var(--bg)] border rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--text)] outline-none transition-all ${
+                      passwordsMismatch 
+                        ? 'border-red-500/50 focus:border-red-500' 
+                        : passwordsMatch 
+                          ? 'border-emerald-500/50 focus:border-emerald-500' 
+                          : 'border-[var(--border)] focus:border-[var(--neon)]'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)] hover:text-[var(--text)] bg-transparent border-none cursor-pointer p-0"
+                  >
+                    {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </motion.div>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -345,12 +413,13 @@ export default function Auth() {
               Continuar com Google
             </button>
 
-            {/* Alternância Elegante (Sem sublinhado feio de browser) */}
+            {/* Alternância Elegante */}
             <div className="mt-3 pt-3 border-t border-[var(--border)] text-center">
               <button
                 type="button"
                 onClick={() => {
                   setAuthMode(authMode === 'login' ? 'signup' : 'login');
+                  setConfirmPassword('');
                   setErrorMsg(null);
                   setSuccessMsg(null);
                 }}

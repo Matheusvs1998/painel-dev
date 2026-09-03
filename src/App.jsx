@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster, toast } from 'sonner';
+import { AnimatePresence } from 'framer-motion';
 import { supabase } from './lib/supabase';
 import Auth from './components/Auth';
 import AppLayout from './layouts/AppLayout';
+import SplashScreen from './components/SplashScreen';
 
 import Overview from './pages/Overview';
 import Github from './pages/Github';
@@ -21,8 +23,10 @@ const queryClient = new QueryClient();
 
 export default function App() {
   const [session, setSession] = useState(null);
+  const [isSplashActive, setIsSplashActive] = useState(true);
 
   useEffect(() => {
+    // Busca a sessão inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
     });
@@ -33,7 +37,15 @@ export default function App() {
       setSession(session);
     });
 
-    return () => subscription.unsubscribe();
+    // Tempo para a tela de abertura apresentar o logo animado
+    const splashTimer = setTimeout(() => {
+      setIsSplashActive(false);
+    }, 1200);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(splashTimer);
+    };
   }, []);
 
   // Supabase Realtime para escutar eventos do GitHub ao vivo
@@ -54,7 +66,7 @@ export default function App() {
               duration: 5000,
             }
           );
-          queryClient.invalidateQueries({ queryKey: ['githubEvents'] });
+          queryClient.invalidateQueries({ queryKey: ['githubEvents', session.user.id] });
         }
       )
       .subscribe();
@@ -67,6 +79,12 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <Toaster theme="dark" position="top-right" richColors />
+      
+      {/* Tela de Abertura Futurista com o Logo */}
+      <AnimatePresence>
+        {isSplashActive && <SplashScreen />}
+      </AnimatePresence>
+
       {!session ? (
         <Auth />
       ) : (
