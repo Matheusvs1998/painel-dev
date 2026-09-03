@@ -1,241 +1,173 @@
-# 🚀 DevSystem — Painel de Monitoramento & Integração para Desenvolvedores
+# DevSystem — Plataforma de Monitoramento & Integração para Engenharia
 
-<div align="center">
-  <img src="public/favicon.svg" alt="DevSystem Logo" width="80" height="80" />
-  <h2>Plataforma Fullstack em Tempo Real para Monitoramento de Engenharia e Webhooks</h2>
-
-  ![React 19](https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-  ![Vite](https://img.shields.io/badge/Vite-8.2.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-  ![Node.js](https://img.shields.io/badge/Node.js-Express_5-339933?style=for-the-badge&logo=node.js&logoColor=white)
-  ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_%26_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-  ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
-  ![Status](https://img.shields.io/badge/Status-Produção_Ready-00ff9d?style=for-the-badge)
-</div>
+O **DevSystem** é uma plataforma corporativa em tempo real desenvolvida para equipes de engenharia de software e operações (DevOps). A solução centraliza o monitoramento de atividades em repositórios do GitHub, acompanha a saúde operacional de serviços e automatiza o fluxo de notificações com suporte nativo a múltiplos usuários e isolamento de dados.
 
 ---
 
-## 📖 Visão Geral do Projeto
+## Demonstração Visual da Aplicação
 
-O **DevSystem** é uma plataforma moderna desenvolvida para engenheiros de software, equipes de desenvolvimento e operações (DevOps) acompanharem em tempo real o fluxo de atividades de repositórios do **GitHub**, a integridade de microserviços, métricas analíticas de entrega e o despacho de notificações com **isolamento estrito de dados por perfil de usuário (Multi-Tenancy)**.
+### Painel Principal (Visão Geral)
+Métricas em tempo real, volume de entregas diárias, distribuição por tipo de evento e listagem consolidada de atividades.
 
-Construído com as versões mais recentes das tecnologias de mercado (**React 19**, **Vite 8**, **Tailwind CSS**, **Node.js/Express 5** e banco de dados **Supabase PostgreSQL**), o sistema oferece uma experiência visual de alto nível com design **Dark Mode Neon Esmeralda (`#00ff9d`)**, animações fluidas via **Framer Motion**, gráficos interativos via **Recharts** e sincronização instantânea via **Supabase Realtime**.
-
----
-
-## 📸 Demonstração Visual da Aplicação
-
-### 1. 📊 Visão Geral & Métricas em Tempo Real (`Overview`)
-Painel analítico central com cartões de indicadores (KPIs), gráfico de fluxo de eventos por dia da semana, distribuição proporcional por tipo de evento e tabela de eventos oficiais filtrados.
-
-![Visão Geral - DevSystem](public/screenshots/overview.png)
+![Painel Principal](public/screenshots/overview.png)
 
 ---
 
-### 2. 🐙 Ingestão de Webhooks do GitHub com Isolamento por Perfil (`GitHub`)
-Central de controle de webhooks onde cada autor possui a sua **URL de webhook exclusiva**. Conta com botões para testes de disparo ao vivo e tabela de eventos recebidos em tempo real.
+### Gestão de Webhooks do GitHub
+Ponto de integração com URL de webhook exclusiva por conta, permitindo que cada usuário monitore seus repositórios de forma isolada.
 
-![GitHub Webhooks - DevSystem](public/screenshots/github.png)
-
----
-
-### 3. 📈 Estatísticas & Métricas de Engenharia (`Stats`)
-Gráficos de barras interativos com o ranking dos repositórios mais movimentados, colaboradores mais ativos, eficiência média de ingestão (~18ms) e taxa de sucesso de 100%.
-
-![Estatísticas de Engenharia - DevSystem](public/screenshots/stats.png)
+![Gestão de Webhooks](public/screenshots/github.png)
 
 ---
 
-### 4. 🔐 Autenticação com Validação de Senha & Token OTP (`Auth`)
-Tela de login e cadastro com efeito *Glassmorphism*, validação em tempo real de senhas idênticas, suporte a **Token OTP de 6 dígitos** enviado por e-mail e botão oficial de **Login com a Google (OAuth)**.
+### Indicadores & Métricas de Engenharia
+Gráficos de barras comparativos por repositório e colaborador, tempo médio de processamento e taxa de entrega operacional.
 
-![Autenticação Segura - DevSystem](public/screenshots/auth.png)
+![Métricas de Engenharia](public/screenshots/stats.png)
 
 ---
 
-## 🏛️ Arquitetura do Sistema
+### Autenticação & Controle de Acesso
+Acesso seguro com suporte a credenciais criptografadas, validação de senhas, verificação em duas etapas via código numérico (OTP) e login social via Google.
+
+![Autenticação e Segurança](public/screenshots/auth.png)
+
+---
+
+## Principais Recursos
+
+- **Monitoramento em Tempo Real**: Conexão contínua via WebSocket para exibição instantânea de pushes, pull requests, issues e lançamentos.
+- **Ambiente Multi-Tenancy**: Isolamento completo de dados por perfil. Cada desenvolvedor gerencia exclusivamente seus repositórios e eventos.
+- **Filtros Analíticos**: Segmentação de indicadores por períodos (24 horas, 7 dias, 30 dias ou histórico completo) e por repositório.
+- **Localizador Global (Spotlight)**: Mecanismo de busca rápida (acessível via `Ctrl + K`) para transição ágil entre módulos e filtragem de eventos.
+- **Central de Relatórios**: Exportação de dados oficiais em formatos estruturados CSV e JSON para auditoria e relatórios gerenciais.
+- **Notificações Flexíveis**: Estrutura preparada para despacho de alertas em múltiplos canais (Discord, Slack, Telegram e E-mail).
+
+---
+
+## Arquitetura da Solução
 
 ```mermaid
 flowchart TD
-    subgraph Frontend["🖥️ Frontend (React 19 + Vite 8)"]
-        UI["Dashboard & Componentes Modernos"]
-        AuthUI["Supabase Auth (OTP / Google OAuth)"]
-        Query["TanStack React Query v5"]
-        Realtime["Supabase Realtime Listener (WebSocket)"]
-    end
+    Frontend["Interface Web (React / Vite)"]
+    Backend["API de Serviços (Node.js / Express)"]
+    Supabase["Banco de Dados & Auth (PostgreSQL)"]
+    GitHub["Repositórios GitHub (Webhooks)"]
 
-    subgraph Backend["⚡ Backend (Node.js + Express 5)"]
-        Server["server.js (Porta 3001)"]
-        GH_Webhook["Endpoint /api/webhooks/github"]
-        Status["Endpoint /api/status"]
-        Simulate["Endpoint /api/webhooks/github/simulate"]
-    end
-
-    subgraph Cloud["☁️ Nuvem (Supabase & GitHub)"]
-        SupabaseDB[("PostgreSQL (github_events)")]
-        EdgeFunctions["Edge Function (github-webhook)"]
-        GitHub["GitHub Repositories (Push, PR, Issues)"]
-    end
-
-    UI <--> Query
-    Query <-->|HTTP REST| Server
-    Server <-->|Leitura & Gravação Isolada| SupabaseDB
-    Realtime <-->|Postgres Changes| SupabaseDB
-    GitHub -->|Payloads HTTP POST| EdgeFunctions
-    EdgeFunctions -->|Gravação Direta| SupabaseDB
-    GitHub -.->|Payloads HTTP POST| GH_Webhook
+    Frontend <-->|Consultas REST & Cache| Backend
+    Backend <-->|Leitura e Gravação| Supabase
+    Frontend <-->|Assinatura em Tempo Real| Supabase
+    GitHub -->|Eventos HTTP POST| Backend
+    GitHub -->|Eventos HTTP POST| Supabase
 ```
 
 ---
 
-## ✨ Funcionalidades em Destaque
+## Tecnologias Empregadas
 
-- **🎬 Tela de Abertura Futurista (`SplashScreen`)**: Animação de inicialização suave com o logotipo oficial estilizado em verde neon antes do carregamento do dashboard.
-- **🔒 Isolamento Rigoroso de Dados por Perfil (Multi-Tenancy)**: Cada conta registrada possui seus próprios dados, seus próprios eventos e uma **URL de Webhook oficial exclusiva** (`?user_id=...`).
-- **📅 Filtros de Período & Repositórios**: Filtre qualquer gráfico ou tabela por `24 Horas`, `7 Dias`, `30 Dias` ou `Todo o Histórico`, além de filtrar por repositório específico.
-- **🔍 Busca Global Inteligente (`Spotlight / Ctrl+K`)**: Barra de pesquisa universal no cabeçalho para navegar instantaneamente entre telas e localizar eventos por repositório ou autor.
-- **👤 Perfil & Preferências Personalizadas**: Modal com abas para edição de nome, foto de perfil com gerador de avatar DiceBear, alternância de tema visual e idioma.
-- **📡 Central de Canais de Notificação**: Gestão e simulação de envio para Discord, Slack, Telegram, E-mail e Webhooks customizados.
-- **📑 Exportação de Relatórios**: Download com 1 clique de dados oficiais nos formatos **CSV** (compatível com Excel) e **JSON estruturado**.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-### Frontend
-- **React 19** (`^19.2.8`) & **React DOM 19**
-- **Vite 8** (`^8.2.0`) — Build tool de alta performance
-- **Tailwind CSS v4** — Estilização utilitária e design tokens
-- **Framer Motion** (`^13.1.1`) — Animações fluidas e micro-interações
-- **TanStack React Query v5** (`^5.102.2`) — Gerenciamento de cache e sincronização de dados
-- **Recharts** (`^3.10.1`) — Visualização gráfica responsiva (Área, Barras, Pizza)
-- **Lucide React** — Pacote completo de ícones modernos
-- **Sonner** — Notificações Toast elegantes
-- **i18next** — Internacionalização completa (Português PT-BR e Inglês EN-US)
-
-### Backend
-- **Node.js** & **Express 5** (`^5.2.1`)
-- **@supabase/supabase-js** (`^2.112.1`)
-- **Cors** & **Dotenv**
-- **Crypto** — Validação criptográfica de assinaturas HMAC-SHA256
-
-### Banco de Dados & Infraestrutura
-- **Supabase** (PostgreSQL com Row Level Security)
-- **Supabase Realtime** (WebSocket Database Changes)
-- **Supabase Edge Functions** (Deno Runtime)
+| Camada | Tecnologia | Finalidade |
+| :--- | :--- | :--- |
+| **Frontend** | React 19 & Vite 8 | Construção de interface reativa de alta performance |
+| **Estilização** | Tailwind CSS v4 & Vanilla CSS | Sistema de design e padronização visual |
+| **Animações** | Framer Motion | Transições suaves e micro-interações de usuário |
+| **Gráficos** | Recharts | Visualização analítica responsiva |
+| **Estado & Cache** | TanStack React Query v5 | Gerenciamento e sincronização de dados assíncronos |
+| **Backend** | Node.js & Express 5 | API RESTful e processamento de webhooks |
+| **Banco de Dados** | Supabase (PostgreSQL) | Persistência relacional, autenticação e mensageria |
 
 ---
 
-## 📦 Como Instalar e Rodar o Projeto Localmente
+## Guia de Instalação e Execução
 
 ### Pré-requisitos
-- **Node.js** (v18 ou superior)
-- Gerenciador **npm** ou **yarn**
+- Node.js (versão 18 ou superior)
+- Gerenciador de pacotes npm
 
-### 1. Clonar o Repositório
+### 1. Clonagem do Repositório
 ```bash
 git clone https://github.com/Matheusvs1998/painel-dev.git
 cd painel-dev
 ```
 
-### 2. Instalar as Dependências
+### 2. Instalação das Dependências
 ```bash
-# Na raiz do projeto:
 npm install
-
-# Instalar dependências das pastas frontend e backend:
 cd frontend && npm install
 cd ../backend && npm install
 cd ..
 ```
 
-### 3. Configurar as Variáveis de Ambiente
+### 3. Configuração de Variáveis de Ambiente
 
-Crie o arquivo `.env` dentro da pasta `frontend/`:
+Crie o arquivo `.env` no diretório `frontend/`:
 ```env
 VITE_SUPABASE_URL=https://vdugwerpiuisyiwwkggg.supabase.co
-VITE_SUPABASE_ANON_KEY=sua-chave-anon-aqui
+VITE_SUPABASE_ANON_KEY=sua_chave_publica_aqui
 VITE_API_BASE_URL=http://localhost:3001
 ```
 
-Crie o arquivo `.env` dentro da pasta `backend/`:
+Crie o arquivo `.env` no diretório `backend/`:
 ```env
 SUPABASE_URL=https://vdugwerpiuisyiwwkggg.supabase.co
-SUPABASE_KEY=sua-chave-anon-aqui
+SUPABASE_KEY=sua_chave_publica_aqui
 PORT=3001
-GITHUB_WEBHOOK_SECRET=opcional_seu_segredo
+GITHUB_WEBHOOK_SECRET=seu_segredo_opcional
 ```
 
-### 4. Inicializar a Aplicação
-Para rodar o **Frontend** e o **Backend** simultaneamente:
+### 4. Execução do Sistema
+Para inicializar o painel e o servidor de integração simultaneamente:
 ```bash
-# Na raiz do projeto:
 npm start
 ```
-- **Aplicação Web (Frontend)**: `http://localhost:5173`
-- **API REST (Backend)**: `http://localhost:3001`
+- Interface Web: `http://localhost:5173`
+- API Backend: `http://localhost:3001`
 
 ---
 
-## 🐙 Como Conectar um Repositório GitHub
+## Integração de Repositórios GitHub
 
-1. Acesse o seu repositório no GitHub.
-2. Vá em **Settings** → **Webhooks** → **Add webhook**.
-3. No campo **Payload URL**, cole a URL exclusiva que aparece na sua tela do DevSystem:
-   ```text
-   https://vdugwerpiuisyiwwkggg.supabase.co/functions/v1/github-webhook?user_id=SEU_ID_DE_USUARIO
-   ```
-4. Em **Content type**, selecione: `application/json` *(obrigatório)*.
-5. Em **Which events would you like to trigger this webhook?**, selecione: **Send me everything** (ou escolha *Pushes*, *Pull requests*, *Issues*, *Stars*).
-6. Clique em **Add webhook**.
-
-A partir deste momento, qualquer push, commit ou pull request no seu repositório aparecerá instantaneamente no seu painel!
+1. No repositório desejado no GitHub, acesse **Settings** → **Webhooks** → **Add webhook**.
+2. No campo **Payload URL**, insira a URL individual fornecida na aba **GitHub Webhooks** da sua conta no DevSystem.
+3. Defina o **Content type** como `application/json`.
+4. Selecione os eventos a serem monitorados (*Pushes, Pull requests, Issues, Stars*).
+5. Confirme em **Add webhook**.
 
 ---
 
-## 📂 Estrutura de Pastas do Projeto
+## Estrutura do Projeto
 
 ```text
 dev-dashboard/
-├── backend/
-│   ├── .env                    # Configurações do servidor backend
-│   ├── package.json            # Dependências da API Express
-│   └── server.js               # API REST, endpoints de webhooks e status
+├── backend/                  # Servidor API Express e rotas de webhook
+│   ├── .env                  # Configurações do backend
+│   └── server.js             # Implementação dos serviços REST
 ├── docs/
-│   └── screenshots/            # Capturas de tela para documentação
-├── frontend/
-│   ├── public/
-│   │   ├── favicon.svg         # Ícone vetorial da marca DevSystem
-│   │   └── screenshots/        # Capturas de tela integradas ao frontend
+│   └── screenshots/          # Imagens de demonstração
+├── frontend/                 # Aplicação cliente (SPA)
+│   ├── public/               # Recursos estáticos e imagens
 │   ├── src/
-│   │   ├── components/         # Logo, Header, Sidebar, Auth, SplashScreen, ProfileModal
-│   │   ├── layouts/            # AppLayout (Sidebar + Header + Outlet)
-│   │   ├── lib/                # Configuração do Supabase e api.js
-│   │   ├── pages/              # Overview, Github, Stats, Inbox, Alerts, Channels, Reports, Services, Endpoints
-│   │   ├── App.jsx             # Roteador principal e listeners de Realtime
-│   │   ├── i18n.js             # Internacionalização PT-BR / EN-US
-│   │   └── main.jsx            # Ponto de entrada do React 19
-│   ├── package.json            # Dependências do frontend
-│   └── vite.config.js          # Configuração do Vite 8
-└── supabase/
-    ├── email-templates/        # Templates HTML profissionais em verde neon
-    └── functions/
-        └── github-webhook/     # Edge Function em Deno para ingestão de eventos
+│   │   ├── components/       # Componentes modulares e reutilizáveis
+│   │   ├── layouts/          # Estruturas de navegação e layout
+│   │   ├── lib/              # Utilitários de API e Supabase
+│   │   ├── pages/            # Módulos e páginas do sistema
+│   │   └── App.jsx           # Roteamento e listeners em tempo real
+│   ├── package.json          # Dependências do frontend
+│   └── vercel.json           # Configuração de roteamento em produção
+└── supabase/                 # Modelos de banco de dados e funções serverless
 ```
 
 ---
 
-## 👤 Autoria & Créditos
+## Autoria & Responsabilidade Técnica
 
-<div align="center">
-  <p>Projeto concebido, planejado e desenvolvido por:</p>
-  <h3>👨‍💻 <strong>Matheus Vasconcelos</strong></h3>
-  <p>Engenharia de Software · Arquitetura Fullstack · DevOps & Automações</p>
-  
-  [![GitHub](https://img.shields.io/badge/GitHub-Matheusvs1998-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/Matheusvs1998)
-</div>
+Projeto planejado, arquitetado e desenvolvido por:
+
+**Matheus Vasconcelos**  
+Engenharia de Software · Arquitetura Fullstack · DevOps & Automação  
+GitHub: [Matheusvs1998](https://github.com/Matheusvs1998)
 
 ---
 
-## 📄 Licença
+## Licença
 
-Este projeto está sob a licença **ISC**. Desenvolvido para fins de monitoramento, automação e gestão de engenharia de software de alta performance.
+Este projeto é distribuído sob a licença **ISC**. Desenvolvido com foco em escalabilidade, observabilidade e boas práticas de engenharia de software.
