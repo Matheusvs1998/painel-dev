@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchGithubEvents } from '../lib/api';
 import { motion } from 'framer-motion';
 import { 
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, 
-  CartesianGrid, PieChart, Pie, Cell, LineChart, Line 
+  CartesianGrid, PieChart, Pie, Cell 
 } from 'recharts';
-import { BarChart3, Users, GitPullRequest, GitCommit, ShieldCheck, Flame } from 'lucide-react';
+import { BarChart3, Users, Calendar, Filter, Sparkles } from 'lucide-react';
 import SectionHeader from '../components/SectionHeader';
 import StatCard from '../components/StatCard';
 
@@ -20,22 +20,51 @@ const C = {
   amber: '#f59e0b',
   text: 'var(--text)',
   muted: 'var(--muted)',
-  subtle: 'var(--subtle)'
+  subtle: 'var(--subtle)',
+  hover: 'var(--hover)'
 };
 
 const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius: '1rem' };
 const TOOLTIP_STYLE = { backgroundColor: C.card, borderColor: C.border, borderRadius: '8px', fontSize: 12, color: '#fff' };
 
 export default function Stats() {
+  const [period, setPeriod] = useState('all'); // '24h' | '7d' | '30d' | 'all'
+  const [selectedRepo, setSelectedRepo] = useState('all');
+
   const { data: githubEvents = [] } = useQuery({
     queryKey: ['githubEvents'],
     queryFn: fetchGithubEvents,
     refetchInterval: 5000
   });
 
+  // Lista de repositórios únicos presentes
+  const uniqueReposList = useMemo(() => {
+    const set = new Set();
+    githubEvents.forEach(e => {
+      if (e.repo) set.add(e.repo);
+    });
+    return Array.from(set);
+  }, [githubEvents]);
+
+  // Filtragem dos eventos baseada no período e repositório
+  const filteredEvents = useMemo(() => {
+    const now = Date.now();
+    return githubEvents.filter(ev => {
+      const evTime = new Date(ev.timestamp).getTime();
+
+      if (period === '24h' && now - evTime > 24 * 60 * 60 * 1000) return false;
+      if (period === '7d' && now - evTime > 7 * 24 * 60 * 60 * 1000) return false;
+      if (period === '30d' && now - evTime > 30 * 24 * 60 * 60 * 1000) return false;
+
+      if (selectedRepo !== 'all' && ev.repo !== selectedRepo) return false;
+
+      return true;
+    });
+  }, [githubEvents, period, selectedRepo]);
+
   // Agrupamento por Repositório
   const repoCounts = {};
-  githubEvents.forEach(e => {
+  filteredEvents.forEach(e => {
     const repo = e.repo || 'Outro';
     repoCounts[repo] = (repoCounts[repo] || 0) + 1;
   });
@@ -48,7 +77,7 @@ export default function Stats() {
 
   // Agrupamento por Autor / Desenvolvedor
   const authorCounts = {};
-  githubEvents.forEach(e => {
+  filteredEvents.forEach(e => {
     const author = e.sender || 'Desconhecido';
     authorCounts[author] = (authorCounts[author] || 0) + 1;
   });
@@ -60,7 +89,7 @@ export default function Stats() {
 
   // Tipos de Eventos (Push, Pull Request, Release, Star, Issues)
   const typeCounts = {};
-  githubEvents.forEach(e => {
+  filteredEvents.forEach(e => {
     const t = e.event || 'push';
     typeCounts[t] = (typeCounts[t] || 0) + 1;
   });
@@ -84,24 +113,66 @@ export default function Stats() {
         subtitle="Insights detalhados sobre atividade de repositórios, commits e colaboradores" 
       />
 
+      {/* Barra de Filtros de Período & Repositório */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm">
+        <div className="flex items-center gap-1.5 overflow-x-auto">
+          <Calendar size={15} className="text-[var(--neon)] ml-1 shrink-0" />
+          <span className="text-[11px] font-semibold text-[var(--subtle)] uppercase tracking-wider mr-1 shrink-0">
+            Período:
+          </span>
+          {[
+            { id: '24h', label: '24 Horas' },
+            { id: '7d', label: '7 Dias' },
+            { id: '30d', label: '30 Dias' },
+            { id: 'all', label: 'Todo o Histórico' },
+          ].map(p => (
+            <button
+              key={p.id}
+              onClick={() => setPeriod(p.id)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+                period === p.id
+                  ? 'bg-[var(--neon)] text-[var(--bg)] shadow-[0_0_12px_var(--neonDim)]'
+                  : 'bg-[var(--hover)] text-[var(--muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          <Filter size={14} className="text-[var(--subtle)] shrink-0" />
+          <select
+            value={selectedRepo}
+            onChange={(e) => setSelectedRepo(e.target.value)}
+            className="bg-[var(--bg)] border border-[var(--border)] text-xs text-[var(--text)] py-1.5 px-3 rounded-xl outline-none cursor-pointer font-mono"
+          >
+            <option value="all">Todos os Repositórios ({uniqueReposList.length})</option>
+            {uniqueReposList.map(r => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard 
           label="Total de Eventos" 
-          value={githubEvents.length} 
-          trendLabel="Eventos capturados" 
+          value={filteredEvents.length} 
+          trendLabel={period === 'all' ? 'Total acumulado' : `Período (${period})`} 
           positive={true} 
         />
         <StatCard 
-          label="Repositórios Únicos" 
+          label="Repositórios no Filtro" 
           value={totalRepos} 
           trendLabel="Monitoramento ativo" 
           positive={totalRepos > 0} 
         />
         <StatCard 
-          label="Desenvolvedores" 
+          label="Desenvolvedores Ativos" 
           value={totalAuthors} 
-          trendLabel="Autores identificados" 
+          trendLabel="Colaboradores no período" 
           positive={totalAuthors > 0} 
         />
         <StatCard 
@@ -118,7 +189,7 @@ export default function Stats() {
         <div style={{ ...card, padding: '1.25rem' }} className="flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider m-0">
-              Top Repositórios por Volume
+              Top Repositórios por Volume {period !== 'all' ? `(${period})` : ''}
             </h3>
             <BarChart3 size={16} className="text-[var(--neon)]" />
           </div>
@@ -139,7 +210,7 @@ export default function Stats() {
         <div style={{ ...card, padding: '1.25rem' }} className="flex flex-col">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-xs font-semibold text-[var(--muted)] uppercase tracking-wider m-0">
-              Colaboradores Mais Ativos
+              Colaboradores Mais Ativos {period !== 'all' ? `(${period})` : ''}
             </h3>
             <Users size={16} className="text-[var(--blue)]" />
           </div>
@@ -174,7 +245,7 @@ export default function Stats() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex items-center justify-center flex-col">
-              <span className="text-xl font-bold text-[var(--text)]">{githubEvents.length}</span>
+              <span className="text-xl font-bold text-[var(--text)]">{filteredEvents.length}</span>
               <span className="text-[10px] text-[var(--subtle)] uppercase">Total</span>
             </div>
           </div>
@@ -196,7 +267,7 @@ export default function Stats() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
               <div className="p-4 bg-[var(--hover)] rounded-xl border border-[var(--border)]">
                 <p className="text-xs text-[var(--subtle)] m-0 mb-1">Média de Eventos/Hora</p>
-                <p className="text-lg font-bold m-0 text-[var(--neon)]">{(githubEvents.length / 24).toFixed(1)} ev/h</p>
+                <p className="text-lg font-bold m-0 text-[var(--neon)]">{(filteredEvents.length / 24).toFixed(1)} ev/h</p>
               </div>
               <div className="p-4 bg-[var(--hover)] rounded-xl border border-[var(--border)]">
                 <p className="text-xs text-[var(--subtle)] m-0 mb-1">Taxa de Sucesso</p>
@@ -209,7 +280,7 @@ export default function Stats() {
             </div>
           </div>
           <p className="text-xs text-[var(--subtle)] m-0">
-            * Dados calculados com base no histórico de webhooks recebidos e processados no Supabase.
+            * Dados calculados com base nos eventos filtrados no Supabase.
           </p>
         </div>
       </div>

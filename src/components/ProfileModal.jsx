@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { X, RefreshCw, LogOut, Save, Upload } from 'lucide-react';
+import { 
+  X, RefreshCw, LogOut, Save, Upload, User, Settings, 
+  Moon, Sun, Bell, Globe, Shield, CheckCircle2 
+} from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 
 const C = {
   bg: 'var(--bg)',
@@ -18,23 +23,34 @@ const C = {
 
 const inputStyle = {
   width: '100%',
-  padding: '0.75rem',
+  padding: '0.75rem 1rem',
   background: C.bg,
   border: `1px solid ${C.border}`,
-  borderRadius: '0.5rem',
+  borderRadius: '0.75rem',
   color: C.text,
   fontFamily: 'Inter, sans-serif',
-  fontSize: '0.875rem',
+  fontSize: '0.85rem',
   outline: 'none',
   transition: 'border-color 0.2s',
   boxSizing: 'border-box'
 };
 
 export default function ProfileModal({ session, onClose }) {
+  const { t, i18n } = useTranslation();
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'preferences'
   const [loading, setLoading] = useState(false);
+  
+  // Dados do Perfil
   const [name, setName] = useState(session?.user?.user_metadata?.full_name || '');
   const [avatarSeed, setAvatarSeed] = useState(session?.user?.user_metadata?.avatar_seed || session?.user?.email || 'default');
   const [customAvatarUrl, setCustomAvatarUrl] = useState(session?.user?.user_metadata?.custom_avatar_url || '');
+  
+  // Preferências
+  const [themePref, setThemePref] = useState(session?.user?.user_metadata?.preferred_theme || localStorage.getItem('theme') || 'dark');
+  const [langPref, setLangPref] = useState(session?.user?.user_metadata?.preferred_lang || i18n.language || 'pt');
+  const [notificationsSound, setNotificationsSound] = useState(session?.user?.user_metadata?.notify_sound ?? true);
+  const [highPriorityAlerts, setHighPriorityAlerts] = useState(session?.user?.user_metadata?.notify_high_priority ?? true);
+
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleSave = async (e) => {
@@ -43,26 +59,56 @@ export default function ProfileModal({ session, onClose }) {
     setErrorMsg('');
 
     try {
+      const updatedMetadata = {
+        full_name: name,
+        avatar_seed: avatarSeed,
+        custom_avatar_url: customAvatarUrl,
+        preferred_theme: themePref,
+        preferred_lang: langPref,
+        notify_sound: notificationsSound,
+        notify_high_priority: highPriorityAlerts,
+        updated_at: new Date().toISOString()
+      };
+
       const { error } = await supabase.auth.updateUser({
-        data: { full_name: name, avatar_seed: avatarSeed, custom_avatar_url: customAvatarUrl }
+        data: updatedMetadata
       });
+
       if (error) throw error;
-      onClose(); // Fecha o modal após salvar
+
+      // Aplica preferências imediatas de tema e idioma no cliente
+      if (themePref !== localStorage.getItem('theme')) {
+        document.documentElement.setAttribute('data-theme', themePref);
+        localStorage.setItem('theme', themePref);
+      }
+      if (langPref !== i18n.language) {
+        i18n.changeLanguage(langPref);
+      }
+
+      toast.success('Perfil e preferências salvos com sucesso!');
+      onClose();
     } catch (error) {
       setErrorMsg(error.message);
+      toast.error('Erro ao salvar: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      toast.info('Sessão encerrada.');
+      onClose();
+    } catch (error) {
+      toast.error('Erro ao sair: ' + error.message);
+    }
   };
 
   const generateRandomSeed = () => {
     const randomString = Math.random().toString(36).substring(7);
     setAvatarSeed(randomString);
-    setCustomAvatarUrl(''); // Volta a usar o DiceBear se gerar aleatório
+    setCustomAvatarUrl('');
   };
 
   const handleUpload = async (e) => {
@@ -72,98 +118,238 @@ export default function ProfileModal({ session, onClose }) {
     setErrorMsg('');
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${session.user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file);
+        .upload(filePath, file, { upsert: true });
 
       if (uploadError) throw uploadError;
 
       const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
       setCustomAvatarUrl(data.publicUrl);
+      toast.success('Foto de perfil carregada!');
     } catch (error) {
-      setErrorMsg('Erro no upload. Verifique se o bucket "avatars" é público: ' + error.message);
+      setErrorMsg('Erro no upload. O bucket "avatars" precisa existir no Supabase Storage: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.8)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Inter, sans-serif', backdropFilter: 'blur(4px)'
-    }}>
-      <div style={{
-        background: C.card, padding: '2rem', borderRadius: '1rem',
-        border: `1px solid ${C.border}`, width: '100%', maxWidth: '380px', position: 'relative'
-      }}>
+    <div className="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center p-4 font-sans select-none">
+      <div className="relative w-full max-w-[460px] bg-[var(--card)] border border-[var(--border)] rounded-3xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col">
         
-        <button onClick={onClose} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: C.muted, cursor: 'pointer' }}>
-          <X size={20} />
-        </button>
-
-        <h2 style={{ margin: '0 0 1.5rem', color: C.text, fontSize: '1.25rem', fontWeight: 'bold' }}>Editar Perfil</h2>
-
-        {errorMsg && (
-          <div style={{ background: 'rgba(248,113,113,0.1)', border: `1px solid ${C.red}`, color: C.red, padding: '0.75rem', borderRadius: '0.5rem', fontSize: '0.875rem', marginBottom: '1rem', textAlign: 'center' }}>
-            {errorMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
-            <img 
-              src={customAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
-              alt="Avatar Preview" 
-              style={{ width: '5rem', height: '5rem', borderRadius: '50%', border: `2px solid ${C.neon}`, background: C.bg, objectFit: 'cover' }} 
-            />
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: C.neonDim, border: `1px solid ${C.neonBorder}`, color: C.neon, padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.75rem', cursor: 'pointer' }}>
-                <Upload size={14} /> Enviar Foto
-                <input type="file" accept="image/*" onChange={handleUpload} style={{ display: 'none' }} disabled={loading} />
-              </label>
-              <button 
-                type="button" 
-                onClick={generateRandomSeed}
-                style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: C.bg, border: `1px solid ${C.border}`, color: C.muted, padding: '0.5rem 1rem', borderRadius: '9999px', fontSize: '0.75rem', cursor: 'pointer' }}
-              >
-                <RefreshCw size={14} /> Avatar
-              </button>
+        {/* Cabeçalho Modal */}
+        <div className="flex items-center justify-between p-6 border-b border-[var(--border)] bg-[var(--hover)]/30">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[var(--neonDim)] border border-[var(--neonBorder)] flex items-center justify-center text-[var(--neon)] shadow-[0_0_15px_var(--neonDim)]">
+              <User size={20} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold m-0 text-[var(--text)]">Perfil & Preferências</h2>
+              <p className="text-xs text-[var(--muted)] m-0">{session?.user?.email}</p>
             </div>
           </div>
+          <button 
+            onClick={onClose} 
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--muted)] hover:text-[var(--text)] hover:bg-[var(--hover)] transition-colors cursor-pointer border-none bg-transparent"
+          >
+            <X size={18} />
+          </button>
+        </div>
 
-          <div>
-            <label style={{ display: 'block', color: C.muted, fontSize: '0.75rem', marginBottom: '0.375rem' }}>Nome de Exibição</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Matheus Vasconcelos"
-              style={inputStyle}
-            />
-          </div>
+        {/* Abas de Navegação */}
+        <div className="flex border-b border-[var(--border)] px-6 pt-3 bg-[var(--bg)]/40 gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab('profile')}
+            className={`pb-3 px-3 text-xs font-semibold flex items-center gap-2 transition-all border-b-2 cursor-pointer bg-transparent ${
+              activeTab === 'profile'
+                ? 'border-[var(--neon)] text-[var(--neon)]'
+                : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+            }`}
+          >
+            <User size={14} /> Dados Pessoais
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('preferences')}
+            className={`pb-3 px-3 text-xs font-semibold flex items-center gap-2 transition-all border-b-2 cursor-pointer bg-transparent ${
+              activeTab === 'preferences'
+                ? 'border-[var(--neon)] text-[var(--neon)]'
+                : 'border-transparent text-[var(--muted)] hover:text-[var(--text)]'
+            }`}
+          >
+            <Settings size={14} /> Preferências do Sistema
+          </button>
+        </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+        {/* Formulário */}
+        <form onSubmit={handleSave} className="p-6 flex flex-col gap-5 overflow-y-auto max-h-[70vh]">
+          {errorMsg && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs rounded-xl text-center leading-relaxed">
+              {errorMsg}
+            </div>
+          )}
+
+          {activeTab === 'profile' ? (
+            <>
+              {/* Seção do Avatar */}
+              <div className="flex flex-col items-center gap-3">
+                <div className="relative group">
+                  <img 
+                    src={customAvatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${avatarSeed}`} 
+                    alt="Avatar" 
+                    className="w-20 h-20 rounded-2xl border-2 border-[var(--neon)] bg-[var(--bg)] object-cover shadow-[0_0_20px_var(--neonDim)]" 
+                  />
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 border-2 border-[var(--card)] flex items-center justify-center text-black" title="Ativo">
+                    <CheckCircle2 size={13} />
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <label className="flex items-center gap-1.5 bg-[var(--neonDim)] hover:bg-[var(--neon)] text-[var(--neon)] hover:text-[var(--bg)] border border-[var(--neonBorder)] px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all">
+                    <Upload size={13} /> Enviar Foto
+                    <input type="file" accept="image/*" onChange={handleUpload} className="hidden" disabled={loading} />
+                  </label>
+                  <button 
+                    type="button" 
+                    onClick={generateRandomSeed}
+                    className="flex items-center gap-1.5 bg-[var(--hover)] hover:bg-[var(--card)] border border-[var(--border)] text-[var(--muted)] hover:text-[var(--text)] px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer transition-all"
+                  >
+                    <RefreshCw size={13} /> Gerar Avatar
+                  </button>
+                </div>
+              </div>
+
+              {/* Nome */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+                  Nome de Exibição
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome completo"
+                  style={inputStyle}
+                  className="focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)]"
+                />
+              </div>
+
+              {/* E-mail (Leitura) */}
+              <div>
+                <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+                  E-mail Vinculado
+                </label>
+                <input
+                  type="email"
+                  value={session?.user?.email || ''}
+                  disabled
+                  style={{ ...inputStyle, opacity: 0.6, cursor: 'not-allowed' }}
+                />
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Aba Preferências */}
+              <div className="flex flex-col gap-4">
+                {/* Tema */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    {themePref === 'dark' ? <Moon size={18} className="text-[var(--neon)]" /> : <Sun size={18} className="text-amber-400" />}
+                    <div>
+                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Tema Visual Padrão</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Alternar entre Dark Mode e Light Mode</p>
+                    </div>
+                  </div>
+                  <select
+                    value={themePref}
+                    onChange={(e) => setThemePref(e.target.value)}
+                    className="bg-[var(--bg)] border border-[var(--border)] text-xs text-[var(--text)] py-1.5 px-3 rounded-lg outline-none cursor-pointer"
+                  >
+                    <option value="dark">Escuro (Dark Neon)</option>
+                    <option value="light">Claro (Light)</option>
+                  </select>
+                </div>
+
+                {/* Idioma */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <Globe size={18} className="text-[var(--neon)]" />
+                    <div>
+                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Idioma do Painel</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Português Brasileiro ou Inglês</p>
+                    </div>
+                  </div>
+                  <select
+                    value={langPref}
+                    onChange={(e) => setLangPref(e.target.value)}
+                    className="bg-[var(--bg)] border border-[var(--border)] text-xs text-[var(--text)] py-1.5 px-3 rounded-lg outline-none cursor-pointer"
+                  >
+                    <option value="pt">Português (PT-BR)</option>
+                    <option value="en">English (EN-US)</option>
+                  </select>
+                </div>
+
+                {/* Notificações em Tempo Real */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <Bell size={18} className="text-[var(--neon)]" />
+                    <div>
+                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Notificações Instantâneas</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Exibir toasts de novos eventos ao vivo</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={notificationsSound}
+                    onChange={(e) => setNotificationsSound(e.target.checked)}
+                    className="w-4 h-4 accent-[var(--neon)] cursor-pointer"
+                  />
+                </div>
+
+                {/* Alertas Críticos */}
+                <div className="flex items-center justify-between p-3.5 bg-[var(--hover)]/40 rounded-xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3">
+                    <Shield size={18} className="text-emerald-400" />
+                    <div>
+                      <p className="text-xs font-semibold m-0 text-[var(--text)]">Filtro de Incidentes</p>
+                      <p className="text-[10px] text-[var(--subtle)] m-0">Destacar alertas com alta criticidade</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={highPriorityAlerts}
+                    onChange={(e) => setHighPriorityAlerts(e.target.checked)}
+                    className="w-4 h-4 accent-[var(--neon)] cursor-pointer"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          {/* Botões de Ação */}
+          <div className="flex gap-3 pt-3 border-t border-[var(--border)] mt-2">
             <button
               type="button"
               onClick={handleLogout}
-              style={{ flex: 1, padding: '0.75rem', borderRadius: '0.5rem', border: `1px solid ${C.red}`, background: 'rgba(248,113,113,0.1)', color: C.red, fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              className="flex-1 py-2.5 rounded-xl border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
             >
-              <LogOut size={16} /> Sair
+              <LogOut size={15} /> Sair da Conta
             </button>
             <button
               type="submit"
               disabled={loading}
-              style={{ flex: 2, padding: '0.75rem', borderRadius: '0.5rem', border: 'none', background: C.neon, color: C.bg, fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              className="flex-1 py-2.5 rounded-xl bg-[var(--neon)] hover:opacity-95 text-[var(--bg)] font-bold text-xs shadow-[0_0_15px_var(--neonDim)] flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
             >
-              <Save size={16} /> {loading ? 'Salvando...' : 'Salvar'}
+              <Save size={15} /> {loading ? 'Salvando...' : 'Salvar Alterações'}
             </button>
           </div>
-
         </form>
+
       </div>
     </div>
   );
