@@ -137,65 +137,73 @@ export default function Github() {
         </div>
       </div>
 
-      {/* Card 1: URL Oficial do Webhook */}
-      <div style={{ ...card, padding: '1.25rem', borderColor: C.neonBorder }}>
-        <div className="flex items-center justify-between gap-2 mb-1">
-          <p className="text-sm font-bold text-[var(--neon)] m-0 flex items-center gap-2">
-            <UserCheck size={16} /> URL do Seu Webhook Oficial (Cole no GitHub)
-          </p>
-          <span className="text-[10px] font-mono uppercase bg-[var(--neonDim)] text-[var(--neon)] px-2.5 py-0.5 rounded-full font-bold">
-            Perfil Isolado
-          </span>
-        </div>
-        <p className="text-xs text-[var(--muted)] m-0 mb-3 leading-relaxed">
-          No seu repositório do GitHub, vá em <strong>Settings → Webhooks → Add webhook</strong>, cole a URL abaixo com <em>Content type: application/json</em> e marque <em>Send me everything</em>:
-        </p>
-        <div className="p-3 bg-[var(--bg)] rounded-xl border border-[var(--border)] font-mono text-[var(--neon)] flex items-center justify-between gap-3 text-xs sm:text-sm overflow-x-auto">
-          <div className="flex items-center gap-2 truncate">
-            <Globe size={16} className="shrink-0 text-[var(--neon)]" />
-            <span className="truncate">{webhookUrl}</span>
-          </div>
-          <button
-            onClick={copyToClipboard}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[var(--neon)] text-[var(--bg)] font-bold rounded-lg text-xs transition-all cursor-pointer shrink-0 shadow-[0_0_10px_var(--neonDim)]"
-          >
-            <Copy size={13} /> Copiar URL
-          </button>
-        </div>
-      </div>
-
-      {/* Card 2: Vinculação de Repositório do Perfil */}
-      <div style={{ ...card, padding: '1.25rem' }}>
-        <form onSubmit={handleSaveRepo} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <FolderGit2 size={16} className="text-[var(--neon)]" />
-              <label className="text-xs font-bold uppercase tracking-wider text-[var(--text)]">
-                Repositório do GitHub Conectado a este Perfil
-              </label>
+      {/* Card Unificado: Conectar Repositório & Webhook */}
+      <div style={{ ...card, padding: '1.5rem', borderColor: C.neonBorder }} className="flex flex-col gap-4">
+        {/* Cabeçalho do Card */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--border)]">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-[var(--neonDim)] text-[var(--neon)] flex items-center justify-center border border-[var(--neonBorder)] shrink-0">
+              <FolderGit2 size={18} />
             </div>
-            <p className="text-xs text-[var(--muted)] m-0">
-              Digite o nome do seu repositório no formato <code>usuario/repositorio</code> para exibir todos os eventos, commits e deploys associados:
-            </p>
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text)] m-0">Conectar Repositório do GitHub</h3>
+              <p className="text-xs text-[var(--muted)] m-0">Vincule seu repositório e configure o webhook para monitoramento em tempo real</p>
+            </div>
           </div>
+          {connectedRepo ? (
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-semibold bg-[var(--neonDim)] text-[var(--neon)] border border-[var(--neonBorder)] self-start sm:self-auto">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--neon)] animate-pulse"></span>
+              Conectado: {connectedRepo}
+            </span>
+          ) : (
+            <span className="text-[11px] font-mono text-[var(--subtle)] bg-[var(--hover)] px-2.5 py-0.5 rounded-full self-start sm:self-auto">
+              Nenhum repositório vinculado
+            </span>
+          )}
+        </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+        {/* Passo 1: Digite seu Repositório */}
+        <form onSubmit={handleSaveRepo} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative flex-1">
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-[var(--neon)]">1.</span>
             <input
               type="text"
               value={repoInput}
               onChange={(e) => setRepoInput(e.target.value)}
               placeholder="Cole aqui seu repositório (ex: usuario/repositorio)"
-              className="bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] rounded-xl px-3.5 py-2 text-xs font-mono text-[var(--text)] outline-none transition-all w-full sm:w-72"
+              className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-8 pr-4 py-2.5 text-xs font-mono text-[var(--text)] outline-none transition-all"
             />
+          </div>
+          <button
+            type="submit"
+            disabled={savingRepo || !repoInput.trim() || repoInput === connectedRepo}
+            className="px-5 py-2.5 rounded-xl bg-[var(--neon)] text-[var(--bg)] text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 flex items-center justify-center gap-1.5 shadow-[0_0_15px_var(--neonDim)]"
+          >
+            <Check size={14} /> {savingRepo ? 'Salvando...' : 'Vincular Repositório'}
+          </button>
+        </form>
+
+        {/* Passo 2: Webhook para colar no GitHub */}
+        <div className="pt-2 border-t border-[var(--border)]/50">
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <label className="text-[11px] font-semibold text-[var(--subtle)] uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-[var(--neon)] font-bold font-mono">2.</span> URL do Webhook (Cole no seu GitHub em Settings → Webhooks):
+            </label>
+          </div>
+          <div className="p-2.5 sm:p-3 bg-[var(--bg)] rounded-xl border border-[var(--border)] font-mono text-[var(--neon)] flex items-center justify-between gap-3 text-xs overflow-x-auto">
+            <div className="flex items-center gap-2 truncate">
+              <Globe size={15} className="shrink-0 text-[var(--neon)]" />
+              <span className="truncate">{webhookUrl}</span>
+            </div>
             <button
-              type="submit"
-              disabled={savingRepo || repoInput === connectedRepo}
-              className="px-3.5 py-2 rounded-xl bg-[var(--neon)] text-[var(--bg)] text-xs font-bold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 flex items-center gap-1.5"
+              type="button"
+              onClick={copyToClipboard}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--neonDim)] hover:bg-[var(--neon)] text-[var(--neon)] hover:text-[var(--bg)] border border-[var(--neonBorder)] font-bold rounded-lg text-xs transition-all cursor-pointer shrink-0"
             >
-              <Check size={14} /> {savingRepo ? 'Salvando...' : 'Vincular'}
+              <Copy size={13} /> Copiar URL
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* Tabela de Eventos Filtrados por Perfil e Repositório */}
