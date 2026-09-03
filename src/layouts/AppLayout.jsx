@@ -18,14 +18,6 @@ export default function AppLayout({ session }) {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const { data: statusData } = useQuery({
-    queryKey: ['status'],
-    queryFn: fetchApiStatus,
-    refetchInterval: 5000,
-  });
-
-  const statusStr = statusData?.status === 'online' ? t('header.online') : t('header.offline');
-
   return (
     <div className="flex h-screen bg-[var(--bg)] text-[var(--text)] font-sans overflow-hidden flex-col md:flex-row">
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
@@ -36,8 +28,6 @@ export default function AppLayout({ session }) {
           session={session} 
           theme={theme} 
           setTheme={setTheme} 
-          status={statusStr} 
-          pingMs={statusData?.pingMs}
           setIsProfileOpen={setIsProfileOpen}
         />
         

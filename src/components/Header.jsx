@@ -21,7 +21,7 @@ const C = {
   hover: 'var(--hover)'
 };
 
-export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, status, pingMs, setIsProfileOpen }) {
+export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, setIsProfileOpen }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
@@ -201,10 +201,6 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
 
       {/* Lado Direito: Status, Usuário, Tema e Idioma */}
       <div className="flex items-center gap-4 shrink-0">
-        <div className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-full ${status === t('header.online') ? 'bg-[var(--neonDim)] text-[var(--neon)]' : 'bg-red-500/10 text-red-500'}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${status === t('header.online') ? 'bg-[var(--neon)]' : 'bg-red-500'}`}></span>
-          {t('header.backendStatus')} {status} {pingMs ? `· ${pingMs}ms` : ''}
-        </div>
 
         <div className="text-right hidden sm:block">
           <p className="text-sm font-medium m-0 capitalize">
