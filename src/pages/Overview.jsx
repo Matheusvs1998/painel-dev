@@ -38,7 +38,7 @@ export default function Overview() {
   const [selectedRepo, setSelectedRepo] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  const connectedRepo = session?.user?.user_metadata?.github_repo || 'Matheusvs1998/painel-dev';
+  const connectedRepo = session?.user?.user_metadata?.github_repo || '';
 
   const { data: statusData } = useQuery({
     queryKey: ['status'],

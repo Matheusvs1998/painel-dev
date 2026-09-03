@@ -33,8 +33,8 @@ export default function Github() {
   const userId = session?.user?.id || '';
   const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'autor';
   
-  // Repositório que este perfil deseja monitorar
-  const initialRepo = session?.user?.user_metadata?.github_repo || 'Matheusvs1998/painel-dev';
+  // Repositório que este perfil deseja monitorar (inicia vazio para novos perfis)
+  const initialRepo = session?.user?.user_metadata?.github_repo || '';
   const [connectedRepo, setConnectedRepo] = useState(initialRepo);
   const [repoInput, setRepoInput] = useState(initialRepo);
 
@@ -59,7 +59,12 @@ export default function Github() {
 
   const handleSaveRepo = async (e) => {
     e?.preventDefault();
-    const clean = repoInput.trim();
+    // Sanitiza se o usuário colou a URL completa do GitHub (ex: https://github.com/user/repo)
+    let clean = repoInput.trim()
+      .replace(/^https?:\/\/github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '');
+
     setSavingRepo(true);
     try {
       const { error } = await supabase.auth.updateUser({
@@ -67,6 +72,7 @@ export default function Github() {
       });
       if (error) throw error;
       setConnectedRepo(clean);
+      setRepoInput(clean);
       await queryClient.invalidateQueries({ queryKey: ['githubEvents'] });
       toast.success(`Repositório "${clean}" vinculado ao seu perfil com sucesso!`);
     } catch (err) {
@@ -178,8 +184,8 @@ export default function Github() {
               type="text"
               value={repoInput}
               onChange={(e) => setRepoInput(e.target.value)}
-              placeholder="ex: Matheusvs1998/painel-dev"
-              className="bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] rounded-xl px-3.5 py-2 text-xs font-mono text-[var(--text)] outline-none transition-all w-full sm:w-64"
+              placeholder="Cole aqui seu repositório (ex: usuario/repositorio)"
+              className="bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] rounded-xl px-3.5 py-2 text-xs font-mono text-[var(--text)] outline-none transition-all w-full sm:w-72"
             />
             <button
               type="submit"
