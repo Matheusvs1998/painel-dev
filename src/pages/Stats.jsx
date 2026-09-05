@@ -32,16 +32,23 @@ import CustomDropdown from '../components/CustomDropdown';
 
 export default function Stats() {
   const { session } = useOutletContext() || {};
-  const userId = session?.user?.id || '';
-  const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
+  const userHandle = session?.user?.user_metadata?.user_name || 
+                     session?.user?.user_metadata?.github_username || 
+                     session?.user?.email?.split('@')[0] || '';
+  const currentAuthor = session?.user?.user_metadata?.full_name || userHandle || '';
 
   const connectedRepo = session?.user?.user_metadata?.github_repo || '';
   const [period, setPeriod] = useState('all');
   const [selectedRepo, setSelectedRepo] = useState('all');
 
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents', userId, connectedRepo],
-    queryFn: () => fetchGithubEvents({ userId, sender: currentAuthor, repo: connectedRepo }),
+    queryKey: ['githubEvents', userId, connectedRepo, userHandle],
+    queryFn: () => fetchGithubEvents({
+      userId,
+      sender: currentAuthor,
+      repo: connectedRepo,
+      githubUser: userHandle
+    }),
     refetchInterval: 5000
   });
 

@@ -36,7 +36,10 @@ export default function Github() {
   const [releaseNotesText, setReleaseNotesText] = useState('');
 
   const userId = session?.user?.id || '';
-  const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'autor';
+  const userHandle = session?.user?.user_metadata?.user_name || 
+                     session?.user?.user_metadata?.github_username || 
+                     session?.user?.email?.split('@')[0] || '';
+  const currentAuthor = session?.user?.user_metadata?.full_name || userHandle || 'autor';
   
   // Repositório que este perfil deseja monitorar (inicia vazio para novos perfis)
   const initialRepo = session?.user?.user_metadata?.github_repo || '';
@@ -45,11 +48,12 @@ export default function Github() {
 
   // Consulta de eventos com isolamento por usuário e repositório vinculado
   const { data: githubEvents = [], isLoading, refetch } = useQuery({
-    queryKey: ['githubEvents', userId, connectedRepo],
+    queryKey: ['githubEvents', userId, connectedRepo, userHandle],
     queryFn: () => fetchGithubEvents({
       userId,
       sender: currentAuthor,
-      repo: connectedRepo
+      repo: connectedRepo,
+      githubUser: userHandle
     }),
     refetchInterval: 5000
   });

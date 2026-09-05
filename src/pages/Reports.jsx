@@ -25,14 +25,22 @@ const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius
 export default function Reports() {
   const { session } = useOutletContext() || {};
   const userId = session?.user?.id || '';
-  const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'Matheus Vasconcelos';
+  const userHandle = session?.user?.user_metadata?.user_name || 
+                     session?.user?.user_metadata?.github_username || 
+                     session?.user?.email?.split('@')[0] || '';
+  const currentAuthor = session?.user?.user_metadata?.full_name || userHandle || 'Matheus Vasconcelos';
   const connectedRepo = session?.user?.user_metadata?.github_repo || 'painel-dev';
 
   const [isExecutiveModalOpen, setIsExecutiveModalOpen] = useState(false);
 
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents', userId, connectedRepo],
-    queryFn: () => fetchGithubEvents({ userId, sender: currentAuthor, repo: connectedRepo }),
+    queryKey: ['githubEvents', userId, connectedRepo, userHandle],
+    queryFn: () => fetchGithubEvents({
+      userId,
+      sender: currentAuthor,
+      repo: connectedRepo,
+      githubUser: userHandle
+    }),
     refetchInterval: 5000
   });
 

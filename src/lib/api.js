@@ -137,6 +137,56 @@ export async function fetchApiStatus() {
   };
 }
 
+/**
+ * Sanitizador de segurança estrita no cliente (Defense-in-Depth).
+ * Garante que nenhum repositório ou evento de outro usuário apareça na UI.
+ */
+function applyStrictProfileFilter(events, { userId = '', repo = '', sender = '', githubUser = '' }) {
+  if (!Array.isArray(events)) return [];
+
+  const uId = userId || '';
+  const targetRepo = (repo || '')
+    .replace(/^https?:\/\/github\.com\//i, '')
+    .replace(/\.git$/i, '')
+    .replace(/^\/+|\/+$/g, '')
+    .toLowerCase()
+    .trim();
+
+  const ghUser = (githubUser || sender || '').toLowerCase().trim();
+
+  return events.filter(item => {
+    const evSender = (item.sender || '').toLowerCase().trim();
+    const evRepo = (item.repo || '').toLowerCase().trim();
+
+    // 1. Se tem user_id vinculado:
+    if (item.user_id) {
+      if (uId && item.user_id === uId) {
+        if (targetRepo) {
+          return evRepo === targetRepo || evRepo.endsWith('/' + targetRepo);
+        }
+        return true;
+      }
+      return false;
+    }
+
+    // 2. Se o usuário conectou um repositório específico no perfil:
+    if (targetRepo) {
+      if (targetRepo.includes('/')) {
+        return evRepo === targetRepo;
+      }
+      return evRepo === targetRepo || evRepo.endsWith('/' + targetRepo);
+    }
+
+    // 3. Se o usuário tem o username / email handle definido:
+    if (ghUser) {
+      return evSender === ghUser || evRepo.startsWith(`${ghUser}/`);
+    }
+
+    // 4. Perfil sem dados vinculados:
+    return false;
+  });
+}
+
 export async function fetchGithubEvents(firstArg, senderArg, repoArg, githubUserArg) {
   let userId = '';
   let sender = '';
@@ -154,6 +204,8 @@ export async function fetchGithubEvents(firstArg, senderArg, repoArg, githubUser
     repo = repoArg || '';
     githubUser = githubUserArg || '';
   }
+
+  const filterParams = { userId, sender, repo, githubUser };
 
   // 1. Tenta buscar no backend local se estiver no computador
   try {
@@ -173,9 +225,9 @@ export async function fetchGithubEvents(firstArg, senderArg, repoArg, githubUser
     clearTimeout(timeoutId);
 
     if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
-        return data;
+      const rawData = await res.json();
+      if (Array.isArray(rawData) && rawData.length > 0) {
+        return applyStrictProfileFilter(rawData, filterParams);
       }
     }
   } catch (error) {
@@ -183,7 +235,8 @@ export async function fetchGithubEvents(firstArg, senderArg, repoArg, githubUser
   }
 
   // 2. Consulta direta à Nuvem Supabase (Sempre disponível globalmente)
-  return await fetchEventsFromSupabase({ userId, sender, repo, githubUser });
+  const cloudData = await fetchEventsFromSupabase(filterParams);
+  return applyStrictProfileFilter(cloudData, filterParams);
 }
 
 export async function simulateGithubEvent(payload = {}) {
