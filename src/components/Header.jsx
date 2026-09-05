@@ -114,10 +114,10 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
         </button>
 
         <div className="relative w-full">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)]" />
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--subtle)] pointer-events-none" />
           <input 
             type="text" 
-            placeholder={t('header.searchPlaceholder', 'Buscar páginas, eventos ou repositórios...')} 
+            placeholder={t('header.searchPlaceholder', 'Buscar no sistema...')} 
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
@@ -125,9 +125,9 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
             }}
             onFocus={() => setIsSearchOpen(true)}
             style={inputStyle} 
-            className="w-full pl-9 pr-14 py-1.5 rounded-full text-xs font-sans focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] transition-all" 
+            className="w-full pl-9 pr-4 lg:pr-14 py-1.5 rounded-full text-xs font-sans focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] transition-all placeholder:text-[var(--subtle)]" 
           />
-          <span className="hidden sm:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--subtle)] pointer-events-none">
+          <span className="hidden lg:inline-block absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--card)] border border-[var(--border)] text-[var(--subtle)] pointer-events-none">
             Ctrl+K
           </span>
         </div>

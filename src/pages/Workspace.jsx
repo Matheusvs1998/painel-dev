@@ -244,6 +244,9 @@ export default function Workspace() {
   const [newFileNameInput, setNewFileNameInput] = useState('');
   const [fileToDelete, setFileToDelete] = useState(null);
 
+  // Controle de Abas Mobile ('files' | 'editor' | 'ai')
+  const [mobileTab, setMobileTab] = useState('editor');
+
   const activeFile = files.find(f => f.name === activeFileName) || files[0];
   const editorTextareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
@@ -296,6 +299,7 @@ export default function Workspace() {
     if (!openTabs.includes(fileName)) {
       setOpenTabs([...openTabs, fileName]);
     }
+    setMobileTab('editor');
   };
 
   // Fechar aba
@@ -334,6 +338,7 @@ export default function Workspace() {
     setOpenTabs([...openTabs, cleanName]);
     setIsNewFileModalOpen(false);
     setNewFileNameInput('');
+    setMobileTab('editor');
     toast.success(`Arquivo ${cleanName} criado com sucesso!`);
   };
 
@@ -365,6 +370,7 @@ export default function Workspace() {
   // Executar / Rodar Código
   const handleRunCode = () => {
     setRightTab('terminal');
+    setMobileTab('ai');
     const timeStr = new Date().toLocaleTimeString();
     setTerminalLogs(prev => [
       ...prev,
@@ -393,6 +399,7 @@ export default function Workspace() {
   const triggerDevAiAction = async (actionType, customPrompt = '') => {
     setAiLoading(true);
     setRightTab('copilot');
+    setMobileTab('ai');
 
     try {
       const data = await askDevAiCopilot({
@@ -447,6 +454,7 @@ export default function Workspace() {
   const handleApplyAiCode = (code) => {
     if (!code) return;
     handleCodeChange(code);
+    setMobileTab('editor');
     toast.success(`Código aplicado em ${activeFileName}!`);
   };
 
@@ -553,33 +561,33 @@ export default function Workspace() {
   const lineNumbers = Array.from({ length: Math.max(lineCount, 15) }, (_, i) => i + 1);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-5rem)] bg-[var(--bg)] text-[var(--text)] overflow-hidden rounded-2xl border border-[var(--border)] shadow-[0_0_30px_rgba(0,0,0,0.5)]">
+    <div className="flex flex-col h-[calc(100vh-5.5rem)] min-h-[500px] bg-[var(--bg)] text-[var(--text)] overflow-hidden rounded-2xl border border-[var(--border)] shadow-[0_0_30px_rgba(0,0,0,0.5)]">
       
       {/* 1. TOPBAR DA IDE */}
-      <div className="flex flex-wrap items-center justify-between px-4 py-2.5 bg-[#090e0e] border-b border-[var(--border)] gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[var(--neonDim)] border border-[var(--neonBorder)] flex items-center justify-center text-[var(--neon)]">
-            <Code2 size={18} />
+      <div className="flex flex-wrap items-center justify-between px-3 md:px-4 py-2 bg-[#090e0e] border-b border-[var(--border)] gap-2">
+        <div className="flex items-center gap-2.5">
+          <div className="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[var(--neonDim)] border border-[var(--neonBorder)] flex items-center justify-center text-[var(--neon)] shrink-0">
+            <Code2 size={16} />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold text-white tracking-wide m-0">Dev Studio & Cloud IDE</h2>
-              <span className="px-2 py-0.5 rounded-full bg-[var(--neonDim)] border border-[var(--neonBorder)] text-[10px] text-[var(--neon)] font-mono font-semibold">
-                IA Powered
+            <div className="flex items-center gap-1.5">
+              <h2 className="text-xs md:text-sm font-bold text-white tracking-wide m-0 truncate">Dev Studio & IDE</h2>
+              <span className="px-1.5 py-0.5 rounded-full bg-[var(--neonDim)] border border-[var(--neonBorder)] text-[9px] md:text-[10px] text-[var(--neon)] font-mono font-semibold">
+                IA
               </span>
             </div>
-            <p className="text-[11px] text-[var(--subtle)] m-0">Workspace de Código e Automação de Engenharia</p>
+            <p className="text-[10px] text-[var(--subtle)] m-0 hidden sm:block">Workspace de Código e Automação de Engenharia</p>
           </div>
         </div>
 
         {/* Seleção de Template e Ações */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <div className="flex items-center bg-[#111817] border border-[var(--border)] rounded-lg px-2 py-1 text-xs">
-            <Layers size={14} className="text-[var(--neon)] mr-2" />
+            <Layers size={13} className="text-[var(--neon)] mr-1.5 shrink-0" />
             <select
               value={selectedTemplate}
               onChange={(e) => handleSelectTemplate(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer"
+              className="bg-transparent text-white text-xs outline-none cursor-pointer max-w-[130px] sm:max-w-none truncate"
             >
               <option value="web_landing" className="bg-[#111817]">Web Showcase (HTML/CSS/JS)</option>
               <option value="api_node" className="bg-[#111817]">Node.js Express API</option>
@@ -589,9 +597,9 @@ export default function Workspace() {
 
           <button
             onClick={handleRunCode}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--neon)] text-[var(--bg)] font-bold text-xs hover:brightness-110 shadow-[0_0_12px_var(--neonDim)] transition-all"
+            className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-[var(--neon)] text-[var(--bg)] font-bold text-xs hover:brightness-110 shadow-[0_0_12px_var(--neonDim)] transition-all cursor-pointer"
           >
-            <Play size={13} fill="currentColor" />
+            <Play size={12} fill="currentColor" />
             <span>Executar</span>
           </button>
 
@@ -600,16 +608,60 @@ export default function Workspace() {
             title="Exportar código do projeto"
             className="p-1.5 rounded-lg bg-[#111817] border border-[var(--border)] text-[var(--muted)] hover:text-white hover:border-[var(--neonBorder)] transition-all"
           >
-            <Download size={15} />
+            <Download size={14} />
           </button>
         </div>
       </div>
 
-      {/* 2. CORPO PRINCIPAL (3 COLUNAS) */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* BARRA DE NAVEGAÇÃO DE ABAS NO MOBILE (< LG) */}
+      <div className="lg:hidden flex items-center bg-[#070c0c] border-b border-[var(--border)] p-1 gap-1 shrink-0">
+        <button
+          type="button"
+          onClick={() => setMobileTab('files')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            mobileTab === 'files'
+              ? 'bg-[var(--neon)] text-[var(--bg)] font-bold shadow-sm'
+              : 'bg-[#0f1716] text-[var(--muted)] hover:text-white'
+          }`}
+        >
+          <FileCode size={13} />
+          <span>Arquivos ({files.length})</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab('editor')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            mobileTab === 'editor'
+              ? 'bg-[var(--neon)] text-[var(--bg)] font-bold shadow-sm'
+              : 'bg-[#0f1716] text-[var(--muted)] hover:text-white'
+          }`}
+        >
+          <Code2 size={13} />
+          <span className="truncate max-w-[120px]">{activeFileName}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setMobileTab('ai')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
+            mobileTab === 'ai'
+              ? 'bg-[var(--neon)] text-[var(--bg)] font-bold shadow-sm'
+              : 'bg-[#0f1716] text-[var(--muted)] hover:text-white'
+          }`}
+        >
+          <Sparkles size={13} />
+          <span>DevAI & Exec</span>
+        </button>
+      </div>
+
+      {/* 2. CORPO PRINCIPAL (3 COLUNAS NO DESKTOP, ABAS NO MOBILE) */}
+      <div className="flex flex-1 overflow-hidden relative">
         
         {/* COLUNA 1: EXPLORADOR DE ARQUIVOS */}
-        <div className="w-52 bg-[#080d0d] border-r border-[var(--border)] flex flex-col shrink-0">
+        <div className={`w-full lg:w-56 bg-[#080d0d] border-r border-[var(--border)] flex-col shrink-0 ${
+          mobileTab === 'files' ? 'flex flex-1' : 'hidden lg:flex'
+        }`}>
           <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] text-xs text-[var(--muted)] font-semibold uppercase tracking-wider">
             <span>Explorador</span>
             <button
@@ -628,7 +680,7 @@ export default function Workspace() {
                 <div
                   key={file.name}
                   onClick={() => handleOpenFile(file.name)}
-                  className={`group flex items-center justify-between px-2.5 py-1.5 rounded-lg cursor-pointer text-xs font-mono transition-all ${
+                  className={`group flex items-center justify-between px-2.5 py-2 rounded-lg cursor-pointer text-xs font-mono transition-all ${
                     isActive
                       ? 'bg-[#121c1a] text-[var(--neon)] font-semibold border border-[var(--neonBorder)] shadow-[0_0_10px_rgba(0,255,157,0.1)]'
                       : 'text-[var(--muted)] hover:bg-[#0e1414] hover:text-white'
@@ -659,7 +711,9 @@ export default function Workspace() {
         </div>
 
         {/* COLUNA 2: EDITOR DE CÓDIGO */}
-        <div className="flex-1 flex flex-col bg-[#070c0c] border-r border-[var(--border)] overflow-hidden">
+        <div className={`flex-1 flex-col bg-[#070c0c] border-r border-[var(--border)] overflow-hidden ${
+          mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
+        }`}>
           
           {/* Abas de Arquivos */}
           <div className="flex items-center bg-[#090f0f] border-b border-[var(--border)] overflow-x-auto no-scrollbar">
@@ -714,21 +768,33 @@ export default function Workspace() {
           </div>
 
           {/* Rodapé do Editor */}
-          <div className="flex items-center justify-between px-4 py-1.5 bg-[#080d0d] border-t border-[var(--border)] text-[11px] text-[var(--subtle)] font-mono">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between px-3 md:px-4 py-1.5 bg-[#080d0d] border-t border-[var(--border)] text-[11px] text-[var(--subtle)] font-mono">
+            <div className="flex items-center gap-2 md:gap-4">
               <span>Linhas: {lineCount}</span>
-              <span>Caracteres: {activeFile?.content?.length || 0}</span>
+              <span className="hidden sm:inline">Caracteres: {activeFile?.content?.length || 0}</span>
               <span>UTF-8</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-[var(--neon)]"></span>
-              <span className="uppercase text-[var(--neon)] font-semibold">{activeFile?.lang || 'js'}</span>
+              <button
+                type="button"
+                onClick={() => setMobileTab('ai')}
+                className="lg:hidden flex items-center gap-1 px-2 py-0.5 rounded bg-[var(--neonDim)] border border-[var(--neonBorder)] text-[var(--neon)] text-[10px] font-bold cursor-pointer"
+              >
+                <Sparkles size={11} />
+                <span>DevAI & Exec</span>
+              </button>
+              <div className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--neon)]"></span>
+                <span className="uppercase text-[var(--neon)] font-semibold">{activeFile?.lang || 'js'}</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* COLUNA 3: PAINEL DIREITO (COPILOT IA | LIVE PREVIEW | TERMINAL) */}
-        <div className="w-96 flex flex-col bg-[#090e0e] shrink-0 overflow-hidden">
+        <div className={`w-full lg:w-96 flex-col bg-[#090e0e] shrink-0 overflow-hidden ${
+          mobileTab === 'ai' ? 'flex flex-1' : 'hidden lg:flex'
+        }`}>
           
           {/* Abas do Painel Direito */}
           <div className="flex items-center justify-between px-2 bg-[#070c0c] border-b border-[var(--border)]">

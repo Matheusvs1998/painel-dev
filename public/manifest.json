@@ -1,0 +1,19 @@
+{
+  "short_name": "DevSystem",
+  "name": "DevSystem — Plataforma de Engenharia & IDE",
+  "description": "Dashboard de Monitoramento de Engenharia, Webhooks e Cloud IDE com DevAI Copilot",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#060a0a",
+  "theme_color": "#00ff9d",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer", "productivity", "utilities"]
+}

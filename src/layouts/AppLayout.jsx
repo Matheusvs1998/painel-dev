@@ -22,6 +22,14 @@ export default function AppLayout({ session }) {
     <div className="flex h-screen bg-[var(--bg)] text-[var(--text)] font-sans overflow-hidden flex-col md:flex-row">
       <Sidebar isMobileMenuOpen={isMobileMenuOpen} setIsMobileMenuOpen={setIsMobileMenuOpen} />
       
+      {/* Backdrop para fechar o menu mobile ao tocar fora */}
+      {isMobileMenuOpen && (
+        <div 
+          onClick={() => setIsMobileMenuOpen(false)}
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-xs md:hidden"
+        />
+      )}
+
       <main className="flex-1 flex flex-col overflow-hidden">
         <Header 
           setIsMobileMenuOpen={setIsMobileMenuOpen} 
