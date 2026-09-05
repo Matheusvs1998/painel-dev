@@ -32,10 +32,11 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
 
   const userId = session?.user?.id || '';
   const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
+  const connectedRepo = session?.user?.user_metadata?.github_repo || '';
 
   const { data: githubEvents = [] } = useQuery({
-    queryKey: ['githubEvents', userId],
-    queryFn: () => fetchGithubEvents(userId, currentAuthor),
+    queryKey: ['githubEvents', userId, connectedRepo],
+    queryFn: () => fetchGithubEvents({ userId, sender: currentAuthor, repo: connectedRepo }),
     refetchInterval: 5000
   });
 
@@ -314,13 +315,13 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
 
                 {/* Seção 2: Produtividade & IA */}
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-bold">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--neon)] font-bold">
                     🤖 Engenharia & Inteligência Artificial
                   </span>
                   <div className="mt-2 space-y-2">
                     <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
                       <span className="text-[var(--text)]">Disparar DevAI Studio Prompt</span>
-                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-blue-400 border border-[var(--border)] font-mono text-[11px] font-bold">
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-[var(--neon)] border border-[var(--border)] font-mono text-[11px] font-bold">
                         Ctrl + Enter
                       </kbd>
                     </div>

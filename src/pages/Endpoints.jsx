@@ -19,7 +19,7 @@ export default function Endpoints() {
         </div>
         {ENDPOINTS.map((ep, i) => (
           <div key={i} className="min-w-[650px] grid grid-cols-[100px_1.5fr_1.5fr_90px] gap-4 p-4 items-center border-b border-[var(--border)] last:border-b-0 hover:bg-[var(--hover)] transition-colors">
-            <span className={`text-[0.7rem] font-mono font-bold px-2 py-1 rounded w-fit ${ep.method === 'GET' ? 'bg-blue-500/10 text-blue-400' : 'bg-emerald-500/10 text-[var(--neon)]'}`}>
+            <span className={`text-[0.7rem] font-mono font-bold px-2 py-1 rounded w-fit ${ep.method === 'GET' ? 'bg-[var(--neonDim)] text-[var(--neon)] border border-[var(--neonBorder)]' : 'bg-emerald-500/20 text-emerald-300'}`}>
               {ep.method}
             </span>
             <span className="font-mono text-xs text-[var(--text)] truncate" title={ep.path}>{ep.path}</span>

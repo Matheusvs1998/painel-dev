@@ -32,46 +32,52 @@ async function fetchEventsFromSupabase({ userId = '', sender = '', repo = '', gi
     }));
 
     const uId = userId || '';
-    const sdr = (sender || '').toLowerCase().trim();
-    const targetRepo = (repo || '').toLowerCase().trim();
+    // Normalização estrita do repositório conectado ao perfil
+    const targetRepo = (repo || '')
+      .replace(/^https?:\/\/github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '')
+      .toLowerCase()
+      .trim();
+
     const ghUser = (githubUser || '').toLowerCase().trim();
 
-    // Filtragem de dados com isolamento por usuário e repositório
+    // Filtragem estrita com isolamento total por perfil e repositório
     const filtered = allDb.filter(item => {
-      // 1. Se tem user_id vinculado na tabela:
-      if (item.user_id && item.user_id === uId) {
-        return true;
+      const evSender = (item.sender || '').toLowerCase().trim();
+      const evRepo = (item.repo || '').toLowerCase().trim();
+
+      // 1. Se o registro tem user_id vinculado na tabela:
+      if (item.user_id) {
+        if (uId && item.user_id === uId) {
+          if (targetRepo) {
+            return evRepo === targetRepo || evRepo.endsWith('/' + targetRepo);
+          }
+          return true;
+        }
+        // Pertence a outro perfil explicitamente -> descarta
+        return false;
       }
 
-      const evSender = (item.sender || '').toLowerCase();
-      const evRepo = (item.repo || '').toLowerCase();
-
-      // 2. Se o usuário conectou um repositório específico (ex: 'Matheusvs1998/painel-dev')
-      if (targetRepo && evRepo) {
-        if (evRepo === targetRepo || evRepo.includes(targetRepo) || targetRepo.includes(evRepo)) {
-          return true;
+      // 2. Registros sem user_id na tabela:
+      // Se o usuário conectou um repositório específico no seu perfil:
+      if (targetRepo) {
+        if (targetRepo.includes('/')) {
+          // Formato completo 'owner/repo' -> deve ser exatamente igual
+          return evRepo === targetRepo;
+        } else {
+          // Formato simples 'repo' -> deve ser igual ou terminar com '/repo'
+          return evRepo === targetRepo || evRepo.endsWith('/' + targetRepo);
         }
       }
 
-      // 3. Se o usuário cadastrou seu GitHub username (ex: 'Matheusvs1998')
+      // 3. Se o usuário cadastrou apenas o GitHub username (sem repositório específico):
       if (ghUser) {
-        if (evSender === ghUser || evRepo.startsWith(`${ghUser}/`)) {
-          return true;
-        }
+        return evSender === ghUser || evRepo.startsWith(`${ghUser}/`);
       }
 
-      // 4. Se o sender ou repo coincide com o autor da conta
-      if (sdr) {
-        if (evSender === sdr || evSender.includes(sdr) || sdr.includes(evSender) || evRepo.includes(sdr)) {
-          return true;
-        }
-      }
-
-      // Se nenhum critério de busca foi enviado, exibe os eventos gerais
-      if (!uId && !sdr && !targetRepo && !ghUser) {
-        return true;
-      }
-
+      // 4. Perfil novo sem repositório conectado nem username:
+      // NÃO expõe dados de terceiros. Mantém perfil limpo e isolado.
       return false;
     });
 
@@ -214,12 +220,12 @@ export async function simulateGithubEvent(payload = {}) {
 
     const { error } = await supabase
       .from('github_events')
-      .insert([{ event_type, action, sender, repo, user_id }]);
+      .insert([{ event_type, action, sender, repo }]);
 
     if (error) throw error;
     return {
       message: 'Evento registrado com sucesso na nuvem',
-      event: { event: event_type, action, sender, repo, user_id }
+      event: { event: event_type, action, sender, repo }
     };
   }
 

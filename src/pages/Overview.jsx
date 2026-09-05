@@ -27,6 +27,7 @@ const card = { background: C.card, border: `1px solid ${C.border}`, borderRadius
 const TOOLTIP_STYLE = { backgroundColor: C.card, borderColor: C.border, borderRadius: '8px', fontSize: 12, color: '#fff' };
 
 import { useOutletContext } from 'react-router-dom';
+import CustomDropdown from '../components/CustomDropdown';
 
 export default function Overview() {
   const { session } = useOutletContext() || {};
@@ -168,17 +169,17 @@ export default function Overview() {
         <div className="flex items-center gap-3">
           {/* Seletor de Repositório */}
           <div className="flex items-center gap-1.5 flex-1 md:flex-initial">
-            <Filter size={14} className="text-[var(--subtle)] shrink-0" />
-            <select
+            <CustomDropdown
               value={selectedRepo}
-              onChange={(e) => setSelectedRepo(e.target.value)}
-              className="bg-[#0b0f17] border border-[var(--border)] text-xs text-[var(--neon)] py-1.5 px-3 rounded-xl outline-none cursor-pointer w-full md:w-auto font-mono focus:border-[var(--neon)] shadow-sm [&>option]:bg-[#0f172a] [&>option]:text-[#f8fafc]"
-            >
-              <option value="all">Todos os Repositórios ({uniqueReposList.length})</option>
-              {uniqueReposList.map((r, idx) => (
-                <option key={`repo-${r}-${idx}`} value={r}>{r}</option>
-              ))}
-            </select>
+              onChange={setSelectedRepo}
+              options={[
+                { value: 'all', label: `Todos os Repositórios (${uniqueReposList.length})` },
+                ...uniqueReposList.map(r => ({ value: r, label: r }))
+              ]}
+              icon={Filter}
+              className="w-full md:w-auto"
+              menuWidth="w-full md:min-w-[280px]"
+            />
           </div>
 
           {/* Busca Rápida Local */}

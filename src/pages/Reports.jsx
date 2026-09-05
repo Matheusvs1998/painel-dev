@@ -159,7 +159,7 @@ Lead Software Engineer & Cloud Architect
         <div style={card} className="p-5">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs text-[var(--muted)] uppercase font-semibold">Formato Padrão</span>
-            <FileText size={16} className="text-blue-400" />
+            <FileText size={16} className="text-[var(--neon)]" />
           </div>
           <p className="text-2xl font-bold m-0 text-[var(--text)]">UTF-8 / RFC4180</p>
           <p className="text-xs text-[var(--subtle)] m-0 mt-1">Compatível com Excel & BI</p>

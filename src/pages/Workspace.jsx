@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { askDevAiCopilot } from '../lib/api';
+import CustomDropdown from '../components/CustomDropdown';
 
 // Templates de Projetos Iniciais
 const PROJECT_TEMPLATES = {
@@ -582,18 +583,18 @@ export default function Workspace() {
 
         {/* Seleção de Template e Ações */}
         <div className="flex items-center gap-1.5 md:gap-2">
-          <div className="flex items-center bg-[#111817] border border-[var(--border)] rounded-lg px-2 py-1 text-xs">
-            <Layers size={13} className="text-[var(--neon)] mr-1.5 shrink-0" />
-            <select
-              value={selectedTemplate}
-              onChange={(e) => handleSelectTemplate(e.target.value)}
-              className="bg-transparent text-white text-xs outline-none cursor-pointer max-w-[130px] sm:max-w-none truncate"
-            >
-              <option value="web_landing" className="bg-[#111817]">Web Showcase (HTML/CSS/JS)</option>
-              <option value="api_node" className="bg-[#111817]">Node.js Express API</option>
-              <option value="python_data" className="bg-[#111817]">Python Data Analytics</option>
-            </select>
-          </div>
+          <CustomDropdown
+            value={selectedTemplate}
+            onChange={handleSelectTemplate}
+            options={[
+              { value: 'web_landing', label: 'Web Showcase (HTML/CSS/JS)' },
+              { value: 'api_node', label: 'Node.js Express API' },
+              { value: 'python_data', label: 'Python Data Analytics' }
+            ]}
+            icon={Layers}
+            className="w-auto"
+            menuWidth="w-[240px]"
+          />
 
           <button
             onClick={handleRunCode}
