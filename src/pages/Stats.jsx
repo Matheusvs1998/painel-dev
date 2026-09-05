@@ -35,6 +35,8 @@ export default function Stats() {
   const currentAuthor = session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || '';
 
   const connectedRepo = session?.user?.user_metadata?.github_repo || '';
+  const [period, setPeriod] = useState('all');
+  const [selectedRepo, setSelectedRepo] = useState('all');
 
   const { data: githubEvents = [] } = useQuery({
     queryKey: ['githubEvents', userId, connectedRepo],
@@ -120,27 +122,28 @@ export default function Stats() {
 
       {/* Barra de Filtros de Período & Repositório */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-3 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-sm">
-        <div className="flex items-center gap-1.5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar w-full sm:w-auto pb-1 sm:pb-0 pr-2">
           <Calendar size={15} className="text-[var(--neon)] ml-1 shrink-0" />
           <span className="text-[11px] font-semibold text-[var(--subtle)] uppercase tracking-wider mr-1 shrink-0">
             Período:
           </span>
           {[
-            { id: '24h', label: '24 Horas' },
-            { id: '7d', label: '7 Dias' },
-            { id: '30d', label: '30 Dias' },
-            { id: 'all', label: 'Todo o Histórico' },
+            { id: '24h', label: '24 Horas', short: '24h' },
+            { id: '7d', label: '7 Dias', short: '7d' },
+            { id: '30d', label: '30 Dias', short: '30d' },
+            { id: 'all', label: 'Todo o Histórico', short: 'Todos' },
           ].map(p => (
             <button
               key={p.id}
               onClick={() => setPeriod(p.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                 period === p.id
                   ? 'bg-[var(--neon)] text-[var(--bg)] shadow-[0_0_12px_var(--neonDim)]'
                   : 'bg-[var(--hover)] text-[var(--muted)] hover:text-[var(--text)]'
               }`}
             >
-              {p.label}
+              <span className="hidden sm:inline">{p.label}</span>
+              <span className="sm:hidden">{p.short}</span>
             </button>
           ))}
         </div>

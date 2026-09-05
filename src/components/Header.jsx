@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { 
   Search, Menu, Sun, Moon, LayoutDashboard, GitBranch, 
   Inbox, Bell, BarChart2, Radio, FileText, Activity, Link2, 
-  X, ArrowRight, ExternalLink 
+  X, ArrowRight, ExternalLink, Command, Keyboard, Sparkles, Terminal
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { fetchGithubEvents } from '../lib/api';
 
@@ -26,6 +27,7 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const searchRef = useRef(null);
 
   const userId = session?.user?.id || '';
@@ -63,7 +65,7 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
       ).slice(0, 4)
     : [];
 
-  // Fechar busca ao clicar fora ou apertar Esc
+  // Fechar busca ao clicar fora ou apertar Esc / Abrir atalhos com Ctrl + /
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
@@ -71,11 +73,18 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
       }
     };
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setIsSearchOpen(false);
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if (e.key === 'Escape') {
+        setIsSearchOpen(false);
+        setIsShortcutsOpen(false);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         searchRef.current?.querySelector('input')?.focus();
         setIsSearchOpen(true);
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === '/' || e.key === ';')) {
+        e.preventDefault();
+        setIsShortcutsOpen(prev => !prev);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -92,7 +101,7 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
     setSearchTerm('');
   };
 
-  const handleSelectEvent = (event) => {
+  const handleSelectEvent = () => {
     navigate('/github');
     setIsSearchOpen(false);
     setSearchTerm('');
@@ -179,7 +188,7 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
                     {filteredEvents.map((ev) => (
                       <div
                         key={ev.id}
-                        onClick={() => handleSelectEvent(ev)}
+                        onClick={handleSelectEvent}
                         className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[var(--hover)] cursor-pointer text-xs transition-colors group"
                       >
                         <div className="flex items-center gap-2.5 truncate">
@@ -199,10 +208,19 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
         )}
       </div>
 
-      {/* Lado Direito: Status, Usuário, Tema e Idioma */}
-      <div className="flex items-center gap-4 shrink-0">
+      {/* Lado Direito: Atalhos, Status, Usuário, Tema e Idioma */}
+      <div className="flex items-center gap-3 shrink-0">
+        {/* Botão Atalhos de Teclado */}
+        <button
+          onClick={() => setIsShortcutsOpen(true)}
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--card)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs text-[var(--text)] font-mono transition-all cursor-pointer shadow-sm"
+          title="Atalhos de Teclado (Ctrl + /)"
+        >
+          <Command size={14} className="text-[var(--neon)]" />
+          <span className="text-[11px] text-[var(--subtle)]">Ctrl+/</span>
+        </button>
 
-        <div className="text-right hidden sm:block">
+        <div className="text-right hidden md:block">
           <p className="text-sm font-medium m-0 capitalize">
             {session?.user?.user_metadata?.full_name || session?.user?.email?.split('@')[0] || 'Usuário'}
           </p>
@@ -237,6 +255,96 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
           <span className="font-mono text-[11px] text-[var(--neon)] font-bold uppercase">{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
         </button>
       </div>
+
+      {/* Modal de Atalhos de Teclado / Dev CheatSheet */}
+      <AnimatePresence>
+        {isShortcutsOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-[var(--card)] border border-[var(--border)] rounded-2xl w-full max-w-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] overflow-hidden"
+            >
+              <div className="p-4 border-b border-[var(--border)] flex justify-between items-center bg-[var(--hover)]/40">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-[var(--neonDim)] text-[var(--neon)]">
+                    <Keyboard size={16} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-[var(--text)] m-0">Atalhos de Teclado do Sistema</h3>
+                    <p className="text-[11px] text-[var(--subtle)] m-0">Produtividade de Engenharia & Dev CheatSheet</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsShortcutsOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[var(--hover)] text-[var(--subtle)] hover:text-[var(--text)] transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="p-5 space-y-4 text-xs">
+                {/* Seção 1: Navegação */}
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[var(--neon)] font-bold">
+                    ⚡ Navegação Rápida
+                  </span>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Abrir Busca Global de Páginas & Eventos</span>
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-[var(--neon)] border border-[var(--border)] font-mono text-[11px] font-bold">
+                        Ctrl + K
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Exibir / Ocultar Este CheatSheet</span>
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-[var(--neon)] border border-[var(--border)] font-mono text-[11px] font-bold">
+                        Ctrl + /
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Fechar Janelas Modais & Busca</span>
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-[var(--muted)] border border-[var(--border)] font-mono text-[11px]">
+                        Esc
+                      </kbd>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Seção 2: Produtividade & IA */}
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-bold">
+                    🤖 Engenharia & Inteligência Artificial
+                  </span>
+                  <div className="mt-2 space-y-2">
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Disparar DevAI Studio Prompt</span>
+                      <kbd className="px-2 py-0.5 rounded bg-[var(--hover)] text-blue-400 border border-[var(--border)] font-mono text-[11px] font-bold">
+                        Ctrl + Enter
+                      </kbd>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Gerar Release Notes Automáticas com IA</span>
+                      <span className="text-[11px] text-[var(--muted)]">Botão na tela GitHub</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[var(--bg)] border border-[var(--border)]">
+                      <span className="text-[var(--text)]">Diagnóstico de Latência & Ping em Tempo Real</span>
+                      <span className="text-[11px] text-[var(--muted)]">Botão na tela Serviços</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Dica de Rodapé */}
+                <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--subtle)]">
+                  <span>DEVSYSTEM v2.4 • Matheus Vasconcelos</span>
+                  <span className="font-mono text-[var(--neon)]">Online & Polled</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }
