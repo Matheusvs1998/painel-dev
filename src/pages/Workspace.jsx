@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Code2, Sparkles, Play, Download, Plus, Trash2, FileCode,
   Check, Copy, Terminal, Eye, RefreshCw, Layers, ShieldCheck,
-  Zap, HelpCircle, Send, ArrowRight, CornerDownLeft, Save
+  Zap, HelpCircle, Send, ArrowRight, CornerDownLeft, Save, X, AlertTriangle
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { askDevAiCopilot } from '../lib/api';
@@ -239,6 +239,11 @@ export default function Workspace() {
   ]);
   const [terminalInput, setTerminalInput] = useState('');
 
+  // Modais Customizados no Layout do Site (sem alertas padrão do navegador)
+  const [isNewFileModalOpen, setIsNewFileModalOpen] = useState(false);
+  const [newFileNameInput, setNewFileNameInput] = useState('');
+  const [fileToDelete, setFileToDelete] = useState(null);
+
   const activeFile = files.find(f => f.name === activeFileName) || files[0];
   const editorTextareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
@@ -303,44 +308,58 @@ export default function Workspace() {
     }
   };
 
-  // Criar novo arquivo
-  const handleCreateNewFile = () => {
-    const rawName = prompt('Nome do novo arquivo (ex: utils.js, api.py, index.html):');
-    if (!rawName || !rawName.trim()) return;
-    const cleanName = rawName.trim();
-    if (files.some(f => f.name === cleanName)) {
-      toast.error('Já existe um arquivo com esse nome.');
+  // Abrir Modal de Criação de Arquivo (sem prompt nativo)
+  const handleOpenNewFileModal = () => {
+    setNewFileNameInput('');
+    setIsNewFileModalOpen(true);
+  };
+
+  // Confirmar Criação de Arquivo via Modal
+  const handleConfirmCreateFile = (e) => {
+    if (e) e.preventDefault();
+    if (!newFileNameInput || !newFileNameInput.trim()) return;
+    const cleanName = newFileNameInput.trim();
+    if (files.some(f => f.name.toLowerCase() === cleanName.toLowerCase())) {
+      toast.error('Já existe um arquivo com esse nome no projeto.');
       return;
     }
-    const ext = cleanName.split('.').pop() || 'js';
+    const ext = cleanName.split('.').pop()?.toLowerCase() || 'js';
     const newFile = {
       name: cleanName,
-      lang: ext === 'py' ? 'python' : ext === 'css' ? 'css' : ext === 'html' ? 'html' : 'javascript',
-      content: `// Novo arquivo: ${cleanName}\n\n`
+      lang: ext === 'py' ? 'python' : ext === 'css' ? 'css' : ext === 'html' ? 'html' : ext === 'json' ? 'json' : 'javascript',
+      content: `// Arquivo: ${cleanName}\n\n`
     };
     setFiles([...files, newFile]);
     setActiveFileName(cleanName);
     setOpenTabs([...openTabs, cleanName]);
-    toast.success(`Arquivo ${cleanName} criado.`);
+    setIsNewFileModalOpen(false);
+    setNewFileNameInput('');
+    toast.success(`Arquivo ${cleanName} criado com sucesso!`);
   };
 
-  // Excluir arquivo
-  const handleDeleteFile = (fileName, e) => {
-    e.stopPropagation();
+  // Solicitar Exclusão de Arquivo via Modal Customizado
+  const handleRequestDeleteFile = (fileName, e) => {
+    if (e) e.stopPropagation();
     if (files.length <= 1) {
       toast.error('O projeto precisa ter pelo menos um arquivo.');
       return;
     }
-    if (confirm(`Deseja excluir "${fileName}"?`)) {
-      const filteredFiles = files.filter(f => f.name !== fileName);
-      setFiles(filteredFiles);
-      const filteredTabs = openTabs.filter(t => t !== fileName);
-      setOpenTabs(filteredTabs);
-      if (activeFileName === fileName) {
-        setActiveFileName(filteredFiles[0].name);
-      }
-      toast.success(`Arquivo ${fileName} excluído.`);
+    setFileToDelete(fileName);
+  };
+
+  // Confirmar Exclusão de Arquivo via Modal
+  const handleConfirmDeleteFile = () => {
+    if (!fileToDelete) return;
+    const fileName = fileToDelete;
+    const filteredFiles = files.filter(f => f.name !== fileName);
+    setFiles(filteredFiles);
+    const filteredTabs = openTabs.filter(t => t !== fileName);
+    setOpenTabs(filteredTabs);
+    if (activeFileName === fileName) {
+      setActiveFileName(filteredFiles[0]?.name || '');
     }
+    setFileToDelete(null);
+    toast.success(`Arquivo ${fileName} excluído.`);
   };
 
   // Executar / Rodar Código
@@ -594,7 +613,7 @@ export default function Workspace() {
           <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] text-xs text-[var(--muted)] font-semibold uppercase tracking-wider">
             <span>Explorador</span>
             <button
-              onClick={handleCreateNewFile}
+              onClick={handleOpenNewFileModal}
               title="Novo arquivo"
               className="p-1 hover:text-[var(--neon)] rounded transition-colors"
             >
@@ -620,7 +639,7 @@ export default function Workspace() {
                     <span className="truncate">{file.name}</span>
                   </div>
                   <button
-                    onClick={(e) => handleDeleteFile(file.name, e)}
+                    onClick={(e) => handleRequestDeleteFile(file.name, e)}
                     className="opacity-0 group-hover:opacity-100 hover:text-red-400 p-0.5 rounded transition-opacity"
                     title="Excluir arquivo"
                   >
@@ -939,6 +958,136 @@ export default function Workspace() {
         </div>
 
       </div>
+
+      {/* MODAL 1: CRIAR NOVO ARQUIVO COM O DESIGN DO SITE */}
+      <AnimatePresence>
+        {isNewFileModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.18 }}
+              className="w-full max-w-md bg-[#090f0f] border border-[var(--neonBorder)] rounded-2xl p-6 shadow-[0_0_50px_rgba(0,255,157,0.15)] relative"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[var(--neonDim)] border border-[var(--neonBorder)] flex items-center justify-center text-[var(--neon)]">
+                    <FileCode size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white m-0">Criar Novo Arquivo</h3>
+                    <p className="text-xs text-[var(--subtle)] m-0">Adicione um novo módulo ao projeto</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsNewFileModalOpen(false)}
+                  className="text-[var(--subtle)] hover:text-white p-1 rounded-lg hover:bg-[#152220] transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form onSubmit={handleConfirmCreateFile}>
+                <div className="mb-5">
+                  <label className="block text-xs font-semibold text-[var(--muted)] mb-2 uppercase tracking-wider">
+                    Nome do Arquivo
+                  </label>
+                  <input
+                    type="text"
+                    value={newFileNameInput}
+                    onChange={(e) => setNewFileNameInput(e.target.value)}
+                    placeholder="ex: utils.js, api.py, index.html, style.css"
+                    autoFocus
+                    className="w-full bg-[#050808] border border-[var(--border)] focus:border-[var(--neon)] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder-[var(--subtle)] outline-none shadow-inner transition-colors"
+                  />
+                  <span className="text-[11px] text-[var(--subtle)] mt-1.5 block">
+                    Extensões suportadas: .js, .jsx, .html, .css, .py, .json, .sql
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border)]">
+                  <button
+                    type="button"
+                    onClick={() => setIsNewFileModalOpen(false)}
+                    className="px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--muted)] hover:text-white hover:bg-[#121c1a] transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={!newFileNameInput.trim()}
+                    className="px-5 py-2.5 rounded-xl bg-[var(--neon)] text-[var(--bg)] text-xs font-bold hover:brightness-110 shadow-[0_0_15px_var(--neonDim)] disabled:opacity-50 transition-all cursor-pointer"
+                  >
+                    Criar Arquivo
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL 2: CONFIRMAR EXCLUSÃO COM O DESIGN DO SITE */}
+      <AnimatePresence>
+        {fileToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.18 }}
+              className="w-full max-w-md bg-[#0d0a0a] border border-red-500/30 rounded-2xl p-6 shadow-[0_0_50px_rgba(239,68,68,0.15)] relative"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+                    <Trash2 size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white m-0">Excluir Arquivo</h3>
+                    <p className="text-xs text-[var(--subtle)] m-0">Confirmação de segurança</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFileToDelete(null)}
+                  className="text-[var(--subtle)] hover:text-white p-1 rounded-lg hover:bg-[#201515] transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-gray-300 leading-relaxed m-0">
+                  Tem certeza de que deseja excluir permanentemente o arquivo <span className="font-mono text-[var(--neon)] font-semibold bg-[#121c1a] px-2 py-0.5 rounded border border-[var(--neonBorder)]">{fileToDelete}</span>?
+                </p>
+                <p className="text-xs text-red-400/80 mt-2 m-0">
+                  Esta ação removerá o arquivo do workspace do projeto.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border)]">
+                <button
+                  type="button"
+                  onClick={() => setFileToDelete(null)}
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border)] text-xs font-semibold text-[var(--muted)] hover:text-white hover:bg-[#181212] transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmDeleteFile}
+                  className="px-5 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold hover:bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.3)] transition-all cursor-pointer"
+                >
+                  Excluir Arquivo
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </div>
   );
