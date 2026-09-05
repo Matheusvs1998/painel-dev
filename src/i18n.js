@@ -17,7 +17,8 @@ const resources = {
         stats: 'Statistics',
         channels: 'Channels',
         endpoints: 'Endpoints',
-        reports: 'Reports'
+        reports: 'Reports',
+        workspace: 'Dev Studio & IA'
       },
       header: {
         searchPlaceholder: 'Search anything...',
@@ -50,6 +51,7 @@ const resources = {
         inbox: 'Inbox',
         alerts: 'Alertas',
         overview: 'Visão Geral',
+        workspace: 'Dev Studio & IA',
         integrations: 'Integrações',
         github: 'GitHub',
         services: 'Serviços',

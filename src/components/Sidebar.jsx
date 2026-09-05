@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom';
 import Logo from './Logo';
 import {
   Inbox, Bell, LayoutDashboard, GitBranch as Github,
-  Users, BarChart2, Radio, Link2, FileText, User, X, Activity
+  Users, BarChart2, Radio, Link2, FileText, User, X, Activity, Code2
 } from 'lucide-react';
 
 const C = {
@@ -34,7 +34,7 @@ function NavItem({ to, icon: Icon, label, badge, neonIcon, onClick }) {
             {label}
           </span>
           {badge ? (
-            <span className="bg-red-500/15 text-red-500 text-[0.7rem] px-1.5 py-0.5 rounded-full font-semibold">
+            <span className="bg-[var(--neonDim)] text-[var(--neon)] border border-[var(--neonBorder)] text-[0.65rem] px-2 py-0.5 rounded-full font-mono font-bold tracking-wider">
               {badge}
             </span>
           ) : null}
@@ -53,6 +53,7 @@ export default function Sidebar({ isMobileMenuOpen, setIsMobileMenuOpen }) {
         { id: 'inbox', to: '/inbox', icon: Inbox, label: t('nav.inbox') },
         { id: 'alerts', to: '/alerts', icon: Bell, label: t('nav.alerts') },
         { id: 'overview', to: '/', icon: LayoutDashboard, label: t('nav.overview') },
+        { id: 'workspace', to: '/workspace', icon: Code2, label: t('nav.workspace'), neonIcon: true, badge: 'IA' },
       ],
     },
     {

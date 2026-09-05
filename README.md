@@ -36,6 +36,10 @@ Acesso seguro com suporte a credenciais criptografadas, validação de senhas, v
 
 ## Principais Recursos
 
+- **Dev Studio & Cloud IDE**: Ambiente de desenvolvimento web completo integrado ao painel, com abas de arquivos, explorador de diretórios, indentação inteligente e atalhos de produtividade.
+- **DevAI Copilot (Inteligência Artificial Integrada)**: Assistente técnico nativo para análise arquitetural, geração de suítes de testes unitários automatizados (Jest / Vitest / Pytest), auditoria estática de vulnerabilidades e refatoração de código com 1 clique.
+- **Live Preview & Sandbox Web**: Renderização e teste em tempo real de páginas e scripts web (HTML, CSS e JavaScript) em sandbox seguro.
+- **Terminal Interativo de Engenharia**: Terminal simulado no dashboard para comandos rápidos (`run`, `test`, `git status`, `ai scan`).
 - **Monitoramento em Tempo Real**: Conexão contínua via WebSocket para exibição instantânea de pushes, pull requests, issues e lançamentos.
 - **Ambiente Multi-Tenancy**: Isolamento completo de dados por perfil. Cada desenvolvedor gerencia exclusivamente seus repositórios e eventos.
 - **Filtros Analíticos**: Segmentação de indicadores por períodos (24 horas, 7 dias, 30 dias ou histórico completo) e por repositório.
@@ -49,12 +53,12 @@ Acesso seguro com suporte a credenciais criptografadas, validação de senhas, v
 
 ```mermaid
 flowchart TD
-    Frontend["Interface Web (React / Vite)"]
-    Backend["API de Serviços (Node.js / Express)"]
+    Frontend["Interface Web & Dev Studio (React / Vite)"]
+    Backend["API de Serviços & DevAI Engine (Node.js / Express)"]
     Supabase["Banco de Dados & Auth (PostgreSQL)"]
     GitHub["Repositórios GitHub (Webhooks)"]
 
-    Frontend <-->|Consultas REST & Cache| Backend
+    Frontend <-->|Consultas REST, Copilot & Cache| Backend
     Backend <-->|Leitura e Gravação| Supabase
     Frontend <-->|Assinatura em Tempo Real| Supabase
     GitHub -->|Eventos HTTP POST| Backend
@@ -68,11 +72,13 @@ flowchart TD
 | Camada | Tecnologia | Finalidade |
 | :--- | :--- | :--- |
 | **Frontend** | React 19 & Vite 8 | Construção de interface reativa de alta performance |
-| **Estilização** | Tailwind CSS v4 & Vanilla CSS | Sistema de design e padronização visual |
+| **Cloud IDE & Playground** | Editor customizado & Sandboxed Iframe | Edição multilinhas, abas, coloração e preview ao vivo |
+| **Inteligência Artificial** | DevAI Copilot Engine | Geração de testes, auditoria estática e refatoração assistida |
+| **Estilização** | Tailwind CSS v4 & Vanilla CSS | Sistema de design e padronização visual neon dark |
 | **Animações** | Framer Motion | Transições suaves e micro-interações de usuário |
 | **Gráficos** | Recharts | Visualização analítica responsiva |
 | **Estado & Cache** | TanStack React Query v5 | Gerenciamento e sincronização de dados assíncronos |
-| **Backend** | Node.js & Express 5 | API RESTful e processamento de webhooks |
+| **Backend** | Node.js & Express 5 | API RESTful, endpoint de IA e processamento de webhooks |
 | **Banco de Dados** | Supabase (PostgreSQL) | Persistência relacional, autenticação e mensageria |
 
 ---

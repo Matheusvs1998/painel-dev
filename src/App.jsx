@@ -18,6 +18,7 @@ import Channels from './pages/Channels';
 import Reports from './pages/Reports';
 import Inbox from './pages/Inbox';
 import Alerts from './pages/Alerts';
+import Workspace from './pages/Workspace';
 
 const queryClient = new QueryClient();
 
@@ -110,6 +111,7 @@ export default function App() {
               <Route path="stats" element={<Stats />} />
               <Route path="channels" element={<Channels />} />
               <Route path="reports" element={<Reports />} />
+              <Route path="workspace" element={<Workspace />} />
               <Route path="inbox" element={<Inbox />} />
               <Route path="alerts" element={<Alerts />} />
               <Route path="*" element={<Overview />} />

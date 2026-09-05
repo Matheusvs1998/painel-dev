@@ -59,4 +59,19 @@ export async function simulateGithubEvent(payload = {}) {
   }
 }
 
+export async function askDevAiCopilot({ action, code, filename, prompt }) {
+  try {
+    const res = await fetch(`${API_BASE}/api/ai/copilot`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, code, filename, prompt })
+    });
+    if (!res.ok) throw new Error('Falha ao comunicar com o DevAI');
+    return await res.json();
+  } catch (error) {
+    console.warn('[API] Erro no DevAI Copilot:', error);
+    throw error;
+  }
+}
+
 export { API_BASE };
