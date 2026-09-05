@@ -32,6 +32,7 @@ import CustomDropdown from '../components/CustomDropdown';
 
 export default function Stats() {
   const { session } = useOutletContext() || {};
+  const userId = session?.user?.id || '';
   const userHandle = session?.user?.user_metadata?.user_name || 
                      session?.user?.user_metadata?.github_username || 
                      session?.user?.email?.split('@')[0] || '';
