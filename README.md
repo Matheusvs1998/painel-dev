@@ -4,7 +4,7 @@ O **DevSystem** é uma plataforma corporativa completa de observabilidade, autom
 
 <div align="center">
 
-[![Baixar APK Android](https://img.shields.io/badge/Download-DevSystem.apk-00ff9d?style=for-the-badge&logo=android&logoColor=black)](https://drive.google.com/file/d/1xqXn3H4HdmBTJFhDJIT2a-VZuf7uOCvG/view?usp=sharing)
+[![Baixar APK Android](https://img.shields.io/badge/Download-DevSystem.apk-00ff9d?style=for-the-badge&logo=android&logoColor=black)](https://drive.google.com/file/d/1v_KFGhSTIIyE66by3WIpnaS9eK6LjrG2/view?usp=sharing)
 [![Acessar Aplicação Web](https://img.shields.io/badge/Web_App-painel--dev--steel.vercel.app-00ff9d?style=for-the-badge&logo=vercel&logoColor=black)](https://painel-dev-steel.vercel.app/)
 
 </div>
@@ -255,7 +255,7 @@ O **DevSystem** conta com versão nativa para dispositivos móveis Android, conf
 
 | Plataforma | Pacote | Link Oficial de Download |
 | :--- | :--- | :--- |
-| **Android (APK Nativo)** | `DevSystem.apk` | [📥 Baixar APK no Google Drive](https://drive.google.com/file/d/1xqXn3H4HdmBTJFhDJIT2a-VZuf7uOCvG/view?usp=sharing) |
+| **Android (APK Nativo)** | `DevSystem.apk` | [📥 Baixar APK no Google Drive](https://drive.google.com/file/d/1v_KFGhSTIIyE66by3WIpnaS9eK6LjrG2/view?usp=sharing) |
 | **Web / PWA** | `Navegador / Standalone` | [🌐 Acessar na Nuvem (Vercel)](https://painel-dev-steel.vercel.app/) |
 
 #### Instruções de Instalação no Celular:
