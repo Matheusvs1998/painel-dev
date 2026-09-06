@@ -1,40 +1,30 @@
-// DevSystem Service Worker para Suporte PWA e Instalação de App (APK / Standalone)
-const CACHE_NAME = 'devsystem-pwa-v1';
-const ASSETS_TO_CACHE = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/favicon.svg',
-  '/icon-192.png',
-  '/icon-512.png'
-];
+// DevSystem Service Worker v2 - Sem interceptação de scripts e HTML para evitar descompasso de chunks
+const CACHE_NAME = 'devsystem-pwa-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE).catch(() => {});
-    })
-  );
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
-          }
-        })
-      );
-    })
+      return Promise.all(keys.map((key) => caches.delete(key)));
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignora chamadas para APIs externas e Supabase para garantir dados em tempo real
+  // Navegação e scripts JS/CSS SEMPRE vão direto para a rede (Network Only)
+  if (
+    event.request.mode === 'navigate' ||
+    event.request.destination === 'script' ||
+    event.request.destination === 'style' ||
+    event.request.url.includes('/assets/')
+  ) {
+    return;
+  }
+
+  // Ignora chamadas para APIs e Supabase
   if (
     event.request.url.includes('supabase.co') ||
     event.request.url.includes('/api/') ||
@@ -42,20 +32,4 @@ self.addEventListener('fetch', (event) => {
   ) {
     return;
   }
-
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        return networkResponse;
-      }).catch(() => {
-        // Fallback para index offline se for navegação
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-      });
-    })
-  );
 });
