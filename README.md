@@ -41,6 +41,13 @@ Diagnóstico instantâneo de infraestrutura com medição de latência em miliss
 
 ---
 
+### Autenticação Segura (Login & Cadastro)
+Interface moderna de autenticação com validação em tempo real de senhas e proteção de sessão de ponta a ponta.
+
+![Autenticação Segura](public/screenshots/auth.png)
+
+---
+
 ## Módulos e Recursos em Destaque
 
 ### 1. Dev Studio & Cloud IDE
