@@ -4,14 +4,11 @@ import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, CheckCircle2, Ale
 import Logo from './Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { Browser } from '@capacitor/browser';
-import { Capacitor } from '@capacitor/core';
 
 export default function Auth() {
   // 'login' | 'signup' | 'verify_otp'
   const [authMode, setAuthMode] = useState('login');
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -148,34 +145,6 @@ export default function Auth() {
       setErrorMsg(error.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  // Login com o Google (OAuth)
-  const handleGoogleLogin = async () => {
-    try {
-      setGoogleLoading(true);
-      const isNative = Capacitor.isNativePlatform();
-      const redirectUrl = isNative 
-        ? 'com.devsystem.dashboard://auth' 
-        : window.location.origin;
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: redirectUrl,
-          skipBrowserRedirect: isNative
-        }
-      });
-      if (error) throw error;
-
-      if (isNative && data?.url) {
-        await Browser.open({ url: data.url, windowName: '_system' });
-      }
-    } catch (error) {
-      toast.error('Erro ao conectar com Google: ' + error.message);
-    } finally {
-      setTimeout(() => setGoogleLoading(false), 2500);
     }
   };
 
@@ -406,38 +375,6 @@ export default function Auth() {
             >
               {loading ? 'Processando...' : (authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta')}
             </motion.button>
-
-            {/* Divisor */}
-            <div className="flex items-center gap-3 my-1 landscape:my-0.5">
-              <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
-              <span className="text-[10px] uppercase tracking-widest text-[var(--subtle)] font-bold">ou</span>
-              <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
-            </div>
-
-            {/* Botão Oficial do Google */}
-            <button
-              type="button"
-              onClick={handleGoogleLogin}
-              disabled={googleLoading || loading}
-              className="w-full py-2 landscape:py-1.5 px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs font-semibold text-[var(--text)] flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {googleLoading ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-[var(--neon)]" />
-                  Abrindo Google...
-                </>
-              ) : (
-                <>
-                  <svg width="18" height="18" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  Continuar com Google
-                </>
-              )}
-            </button>
 
             {/* Alternância Elegante */}
             <div className="mt-2 pt-2 landscape:mt-1.5 landscape:pt-1.5 border-t border-[var(--border)] text-center">
