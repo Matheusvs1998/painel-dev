@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Code2, Sparkles, Play, Download, Plus, Trash2, FileCode,
   Check, Copy, Terminal, Eye, RefreshCw, Layers, ShieldCheck,
-  Zap, HelpCircle, Send, ArrowRight, CornerDownLeft, Save, X, AlertTriangle
+  Zap, HelpCircle, Send, ArrowRight, CornerDownLeft, Save, X, AlertTriangle,
+  Upload, FolderUp
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { askDevAiCopilot } from '../lib/api';
@@ -251,6 +252,65 @@ export default function Workspace() {
   const activeFile = files.find(f => f.name === activeFileName) || files[0];
   const editorTextareaRef = useRef(null);
   const lineNumbersRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // Importar arquivos locais (Computador ou Celular)
+  const processUploadedFile = (file) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const content = event.target?.result;
+      if (typeof content !== 'string') return;
+
+      const name = file.name;
+      const ext = name.split('.').pop()?.toLowerCase() || 'txt';
+      
+      let lang = 'plaintext';
+      if (['js', 'jsx'].includes(ext)) lang = 'javascript';
+      else if (['ts', 'tsx'].includes(ext)) lang = 'typescript';
+      else if (ext === 'html') lang = 'html';
+      else if (ext === 'css') lang = 'css';
+      else if (ext === 'json') lang = 'json';
+      else if (ext === 'py') lang = 'python';
+      else if (ext === 'sql') lang = 'sql';
+      else if (ext === 'md') lang = 'markdown';
+
+      setFiles(prev => {
+        const existingIndex = prev.findIndex(f => f.name.toLowerCase() === name.toLowerCase());
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = { ...updated[existingIndex], content, lang };
+          return updated;
+        }
+        return [...prev, { name, lang, content }];
+      });
+
+      setOpenTabs(prev => prev.includes(name) ? prev : [...prev, name]);
+      setActiveFileName(name);
+      setMobileTab('editor');
+
+      toast.success(`Arquivo "${name}" importado com sucesso!`);
+    };
+
+    reader.onerror = () => {
+      toast.error(`Erro ao ler o arquivo "${file.name}"`);
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleFileUpload = (e) => {
+    const uploadedFiles = Array.from(e.target.files || []);
+    if (uploadedFiles.length === 0) return;
+    uploadedFiles.forEach(processUploadedFile);
+    if (e.target) e.target.value = '';
+  };
+
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    const droppedFiles = Array.from(e.dataTransfer.files || []);
+    if (droppedFiles.length === 0) return;
+    droppedFiles.forEach(processUploadedFile);
+  };
 
   // Troca de Template
   const handleSelectTemplate = (templateKey) => {
@@ -597,6 +657,15 @@ export default function Workspace() {
           />
 
           <button
+            onClick={() => fileInputRef.current?.click()}
+            title="Puxar / Importar arquivo do dispositivo (Mobile ou PC)"
+            className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-[#111817] hover:bg-[#162321] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs text-[var(--text)] transition-all cursor-pointer shadow-sm"
+          >
+            <Upload size={13} className="text-[var(--neon)]" />
+            <span className="hidden sm:inline font-semibold">Puxar Arquivo</span>
+          </button>
+
+          <button
             onClick={handleRunCode}
             className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-lg bg-[var(--neon)] text-[var(--bg)] font-bold text-xs hover:brightness-110 shadow-[0_0_12px_var(--neonDim)] transition-all cursor-pointer"
           >
@@ -612,6 +681,16 @@ export default function Workspace() {
             <Download size={14} />
           </button>
         </div>
+
+        {/* Input Invisível para Upload / Importação */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          multiple
+          className="hidden"
+          accept=".html,.css,.js,.jsx,.ts,.tsx,.json,.py,.sql,.txt,.md,.env,.yaml,.yml"
+        />
       </div>
 
       {/* BARRA DE NAVEGAÇÃO DE ABAS NO MOBILE (< LG) */}
@@ -665,13 +744,22 @@ export default function Workspace() {
         }`}>
           <div className="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] text-xs text-[var(--muted)] font-semibold uppercase tracking-wider">
             <span>Explorador</span>
-            <button
-              onClick={handleOpenNewFileModal}
-              title="Novo arquivo"
-              className="p-1 hover:text-[var(--neon)] rounded transition-colors"
-            >
-              <Plus size={15} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                title="Puxar / Importar arquivo do dispositivo (Mobile ou PC)"
+                className="p-1 hover:text-[var(--neon)] text-[var(--muted)] rounded transition-colors cursor-pointer"
+              >
+                <Upload size={14} />
+              </button>
+              <button
+                onClick={handleOpenNewFileModal}
+                title="Novo arquivo"
+                className="p-1 hover:text-[var(--neon)] text-[var(--muted)] rounded transition-colors cursor-pointer"
+              >
+                <Plus size={15} />
+              </button>
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto py-2 px-1.5 space-y-0.5">
@@ -712,7 +800,10 @@ export default function Workspace() {
         </div>
 
         {/* COLUNA 2: EDITOR DE CÓDIGO */}
-        <div className={`flex-1 flex-col bg-[#070c0c] border-r border-[var(--border)] overflow-hidden ${
+        <div 
+          onDragOver={(e) => e.preventDefault()} 
+          onDrop={handleFileDrop}
+          className={`flex-1 flex-col bg-[#070c0c] border-r border-[var(--border)] overflow-hidden ${
           mobileTab === 'editor' ? 'flex' : 'hidden lg:flex'
         }`}>
           
