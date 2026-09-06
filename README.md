@@ -1,51 +1,122 @@
-# DevSystem — Plataforma de Monitoramento & Integração para Engenharia
+# DevSystem — Plataforma de Monitoramento & Engenharia de Software
 
-O **DevSystem** é uma plataforma corporativa em tempo real desenvolvida para equipes de engenharia de software e operações (DevOps). A solução centraliza o monitoramento de atividades em repositórios do GitHub, acompanha a saúde operacional de serviços e automatiza o fluxo de notificações com suporte nativo a múltiplos usuários e isolamento de dados.
+O **DevSystem** é uma plataforma corporativa completa de observabilidade, automação e desenvolvimento em tempo real, projetada para engenheiros de software e equipes DevOps. A solução unifica o monitoramento contínuo de webhooks do GitHub, telemetria de microsserviços, geração de laudos formais de auditoria e um ambiente de desenvolvimento integrado (**Dev Studio**) com inteligência artificial nativa (**DevAI Copilot**).
 
 ---
 
 ## Demonstração Visual da Aplicação
 
 ### Painel Principal (Visão Geral)
-Métricas em tempo real, volume de entregas diárias, distribuição por tipo de evento e listagem consolidada de atividades.
+Métricas consolidadas em tempo real, volume de entregas diárias, distribuição por tipo de evento e rastreabilidade total de atividades por repositório.
 
 ![Painel Principal](public/screenshots/overview.png)
 
 ---
 
+### Dev Studio & Cloud IDE com DevAI
+Ambiente completo de código no navegador com explorador de diretórios, abas, coloração sintática, execução interativa, sandbox e copiloto de inteligência artificial.
+
+![Dev Studio IDE](public/screenshots/dev_studio.png)
+
+---
+
 ### Gestão de Webhooks do GitHub
-Ponto de integração com URL de webhook exclusiva por conta, permitindo que cada usuário monitore seus repositórios de forma isolada.
+Ponto de integração oficial com URL de webhook exclusiva por conta, garantindo que cada desenvolvedor monitore apenas os seus repositórios com **isolamento estrito de dados**.
 
 ![Gestão de Webhooks](public/screenshots/github.png)
 
 ---
 
 ### Indicadores & Métricas de Engenharia
-Gráficos de barras comparativos por repositório e colaborador, tempo médio de processamento e taxa de entrega operacional.
+Gráficos analíticos de distribuição de eventos, volume de commits, pull requests, deploys e colaboradores ativos com filtros de período (24h, 7d, 30d e histórico completo).
 
 ![Métricas de Engenharia](public/screenshots/stats.png)
 
 ---
 
-### Autenticação & Controle de Acesso
-Acesso seguro com suporte a credenciais criptografadas, validação de senhas, verificação em duas etapas via código numérico (OTP) e login social via Google.
+### Observabilidade & Health Monitor
+Diagnóstico instantâneo de infraestrutura com medição de latência em milissegundos (**Ping ms**), índice de disponibilidade (**SLA 99.98%**) e monitoramento de nós serverless, banco de dados e CDN.
 
-![Autenticação e Segurança](public/screenshots/auth.png)
+![Health Monitor](public/screenshots/services.png)
 
 ---
 
-## Principais Recursos
+## Módulos e Recursos em Destaque
 
-- **Dev Studio & Cloud IDE**: Ambiente de desenvolvimento web completo integrado ao painel, com abas de arquivos, explorador de diretórios, indentação inteligente e atalhos de produtividade.
-- **DevAI Copilot (Inteligência Artificial Integrada)**: Assistente técnico nativo para análise arquitetural, geração de suítes de testes unitários automatizados (Jest / Vitest / Pytest), auditoria estática de vulnerabilidades e refatoração de código com 1 clique.
-- **Live Preview & Sandbox Web**: Renderização e teste em tempo real de páginas e scripts web (HTML, CSS e JavaScript) em sandbox seguro.
-- **Terminal Interativo de Engenharia**: Terminal simulado no dashboard para comandos rápidos (`run`, `test`, `git status`, `ai scan`).
-- **Monitoramento em Tempo Real**: Conexão contínua via WebSocket para exibição instantânea de pushes, pull requests, issues e lançamentos.
-- **Ambiente Multi-Tenancy**: Isolamento completo de dados por perfil. Cada desenvolvedor gerencia exclusivamente seus repositórios e eventos.
-- **Filtros Analíticos**: Segmentação de indicadores por períodos (24 horas, 7 dias, 30 dias ou histórico completo) e por repositório.
-- **Localizador Global (Spotlight)**: Mecanismo de busca rápida (acessível via `Ctrl + K`) para transição ágil entre módulos e filtragem de eventos.
-- **Central de Relatórios**: Exportação de dados oficiais em formatos estruturados CSV e JSON para auditoria e relatórios gerenciais.
-- **Notificações Flexíveis**: Estrutura preparada para despacho de alertas em múltiplos canais (Discord, Slack, Telegram e E-mail).
+### 1. Dev Studio & Cloud IDE
+Ambiente de engenharia integrado diretamente ao painel, permitindo codificar, debugar e testar projetos sem sair da plataforma:
+- **Templates Rápidos**: Inicialização em 1 clique de projetos *Web Showcase (HTML/CSS/JS)*, *Node.js Express API* e *Python Data Analytics*.
+- **Puxar / Importar Arquivo (PC & Mobile)**: Permite importar arquivos locais diretamente do celular (Android/iOS) ou do computador (Windows/Mac/Linux), além de suportar arrastar e soltar (**Drag & Drop**) sobre o editor.
+- **Edição Livre & Persistência**: Modificação em tempo real caractere por caractere, suporte a indentação inteligente (`Tab`), atalho de salvamento (`Ctrl + S`), criação e exclusão de arquivos com modais customizados.
+- **Exportação do Projeto**: Download do pacote completo de arquivos para a máquina local com um clique.
+
+---
+
+### 2. DevAI Copilot (Inteligência Artificial Integrada)
+Assistente de engenharia que atua diretamente sobre o contexto do arquivo aberto no editor:
+- **Explicar Código**: Análise detalhada da arquitetura, fluxo de dados, responsabilidade do módulo e estimativa da complexidade algorítmica ($O(1)$ a $O(n)$).
+- **Gerar Testes**: Criação automatizada de suítes de testes unitários com asserções reais utilizando *Vitest / Jest* (para JavaScript/TypeScript) ou *PyTest* (para Python).
+- **Auditar Segurança**: Varredura estática de vulnerabilidades baseada nas diretrizes do **OWASP Top 10**, detectando riscos de injeção, XSS, sanitização de parâmetros e vazamento acidental de segredos/tokens privados.
+- **Otimizar Código**: Refatoração orientada a performance e *Clean Code*, reduzindo uso de memória (*memory leaks*) com botão para **Aplicar** a sugestão da IA diretamente no editor.
+- **Chat Contextual**: Diálogo livre com a IA para esclarecer dúvidas, planejar novas funções ou debugar comportamentos complexos.
+
+---
+
+### 3. Live Preview & Sandbox Web
+Visualizador dinâmico isolado (*Sandboxed Web Runner*):
+- Compila e renderiza instantaneamente o código HTML, CSS e JavaScript.
+- Permite testar cliques, animações, lógica DOM e estilização visual em tempo real.
+- Botão de recarregamento rápido para reiniciar o estado da página em teste.
+
+---
+
+### 4. Terminal Interativo de Engenharia
+Console de telemetria e execução embutido na IDE:
+- `run`: Compila e simula o ciclo de execução do arquivo ativo sob o motor Node.js / V8 Engine.
+- `test`: Executa as suítes de testes automatizados e retorna o tempo de resposta em milissegundos.
+- `ai scan`: Dispara uma auditoria de segurança completa do DevAI sobre o arquivo.
+- `git status`: Exibe o estado e a quantidade de arquivos rastreados no Workspace.
+- `clear` e `help`: Manutenção de histórico e exibição de comandos disponíveis.
+
+---
+
+### 5. Botão "Executar"
+Ao clicar em **Executar**:
+1. O sistema valida a integridade sintática do arquivo em edição.
+2. Abre a saída no terminal interativo ou no Live Preview (para projetos web).
+3. Emite parecer de execução com código de saída `[Exit code: 0]`.
+
+---
+
+### 6. Relatório Executivo Formal com Assinatura Técnica
+Módulo voltado para governança corporativa e auditorias de software:
+- Gera um laudo formal contendo volume consolidado de entregas, taxa de sucesso de CI/CD, índice de integridade de payloads (HMAC SHA-256) e parecer técnico de engenharia.
+- Contém hash de autenticação exclusivo e **assinatura digital formal de Matheus Vasconcelos** (Lead Software Engineer).
+- Suporte nativo à impressão em PDF (`Ctrl + P`) com layout amigável e botão para cópia rápida do laudo em texto puro.
+
+---
+
+### 7. Release Notes com Inteligência Artificial
+- Localizado na aba GitHub Webhooks, sintetiza o histórico recente de commits, pull requests e deploys da Vercel.
+- Gera um sumário executivo em Markdown pronto para ser publicado diretamente na seção de Releases do GitHub.
+
+---
+
+### 8. Dev CheatSheet & Atalhos de Produtividade
+- Modal de referência rápida acionado via atalho global de teclado **`Ctrl + /`** ou pelo botão de atalhos no cabeçalho.
+- Centraliza os atalhos essenciais:
+  - `Ctrl + K`: Busca global de páginas e eventos (Spotlight).
+  - `Ctrl + /`: Exibir / Ocultar o Dev CheatSheet.
+  - `Esc`: Fechar buscas e janelas modais.
+  - `Ctrl + Enter`: Disparar prompts no DevAI Studio.
+  - `Ctrl + S`: Salvar arquivo localmente no Workspace.
+
+---
+
+### 9. Isolamento Estrito Multi-Tenancy (Privacidade de Dados)
+- O sistema implementa uma camada de proteção em profundidade (*Double Shield* tanto no backend quanto no frontend).
+- Cada perfil de usuário conectado enxerga **apenas e exclusivamente** os repositórios e eventos pertencentes à sua própria conta.
+- Perfis novos iniciam com ambiente limpo, sem qualquer vazamento de dados de outros desenvolvedores.
 
 ---
 
@@ -53,16 +124,17 @@ Acesso seguro com suporte a credenciais criptografadas, validação de senhas, v
 
 ```mermaid
 flowchart TD
-    Frontend["Interface Web & Dev Studio (React / Vite)"]
-    Backend["API de Serviços & DevAI Engine (Node.js / Express)"]
-    Supabase["Banco de Dados & Auth (PostgreSQL)"]
-    GitHub["Repositórios GitHub (Webhooks)"]
+    Frontend["Interface Web & Dev Studio (React 19 / Vite 8)"]
+    Backend["API de Microsserviços (Node.js / Express 5)"]
+    Supabase["Banco de Dados & Autenticação (PostgreSQL Cloud)"]
+    EdgeFunction["Supabase Edge Functions (Deno Serverless)"]
+    GitHub["Repositórios GitHub (Webhooks em Tempo Real)"]
 
-    Frontend <-->|Consultas REST, Copilot & Cache| Backend
-    Backend <-->|Leitura e Gravação| Supabase
-    Frontend <-->|Assinatura em Tempo Real| Supabase
-    GitHub -->|Eventos HTTP POST| Backend
-    GitHub -->|Eventos HTTP POST| Supabase
+    Frontend <-->|Consultas REST, DevAI & Cache Local| Backend
+    Backend <-->|Leitura e Persistência Segura| Supabase
+    Frontend <-->|Sincronização em Tempo Real (Postgres Changes)| Supabase
+    GitHub -->|Assinatura HMAC SHA-256| EdgeFunction
+    EdgeFunction -->|Inserção Idempotente| Supabase
 ```
 
 ---
@@ -71,15 +143,16 @@ flowchart TD
 
 | Camada | Tecnologia | Finalidade |
 | :--- | :--- | :--- |
-| **Frontend** | React 19 & Vite 8 | Construção de interface reativa de alta performance |
-| **Cloud IDE & Playground** | Editor customizado & Sandboxed Iframe | Edição multilinhas, abas, coloração e preview ao vivo |
+| **Frontend** | React 19 & Vite 8 | Interface reativa moderna com alta performance |
+| **Cloud IDE & Playground** | Editor customizado com Line Numbers e Sandboxed Iframe | Edição multilinhas, abas, drag & drop e preview ao vivo |
 | **Inteligência Artificial** | DevAI Copilot Engine | Geração de testes, auditoria estática e refatoração assistida |
-| **Estilização** | Tailwind CSS v4 & Vanilla CSS | Sistema de design e padronização visual neon dark |
-| **Animações** | Framer Motion | Transições suaves e micro-interações de usuário |
-| **Gráficos** | Recharts | Visualização analítica responsiva |
+| **Estilização** | Vanilla CSS & Tailwind CSS | Design System Dark Cyberpunk com paleta Emerald Neon (`#00ff9d`) |
+| **Componentes Interativos** | CustomDropdown & AnimatePresence | Menus suspensos e modais customizados sem dependência de popups nativos |
+| **Animações** | Framer Motion | Transições fluidas e micro-interações responsivas |
+| **Gráficos** | Recharts | Métricas e gráficos de barras/pizza responsivos |
 | **Estado & Cache** | TanStack React Query v5 | Gerenciamento e sincronização de dados assíncronos |
-| **Backend** | Node.js & Express 5 | API RESTful, endpoint de IA e processamento de webhooks |
-| **Banco de Dados** | Supabase (PostgreSQL) | Persistência relacional, autenticação e mensageria |
+| **Backend** | Node.js & Express 5 | API RESTful, endpoint de IA e processamento de dados |
+| **Nuvem & Auth** | Supabase (PostgreSQL & Edge Functions) | Autenticação, criptografia HMAC SHA-256 e mensageria |
 
 ---
 
@@ -135,7 +208,7 @@ npm start
 1. No repositório desejado no GitHub, acesse **Settings** → **Webhooks** → **Add webhook**.
 2. No campo **Payload URL**, insira a URL individual fornecida na aba **GitHub Webhooks** da sua conta no DevSystem.
 3. Defina o **Content type** como `application/json`.
-4. Selecione os eventos a serem monitorados (*Pushes, Pull requests, Issues, Stars*).
+4. Selecione os eventos a serem monitorados (*Pushes, Pull requests, Releases, Issues*).
 5. Confirme em **Add webhook**.
 
 ---
@@ -146,20 +219,18 @@ npm start
 dev-dashboard/
 ├── backend/                  # Servidor API Express e rotas de webhook
 │   ├── .env                  # Configurações do backend
-│   └── server.js             # Implementação dos serviços REST
-├── docs/
-│   └── screenshots/          # Imagens de demonstração
+│   └── server.js             # Implementação dos serviços REST e filtros de perfil
 ├── frontend/                 # Aplicação cliente (SPA)
 │   ├── public/               # Recursos estáticos e imagens
 │   ├── src/
-│   │   ├── components/       # Componentes modulares e reutilizáveis
+│   │   ├── components/       # CustomDropdown, Header, StatCard, Modais
 │   │   ├── layouts/          # Estruturas de navegação e layout
-│   │   ├── lib/              # Utilitários de API e Supabase
-│   │   ├── pages/            # Módulos e páginas do sistema
+│   │   ├── lib/              # Utilitários de API, Supabase e isolamento estrito
+│   │   ├── pages/            # Overview, Workspace, Stats, Github, Services, Reports
 │   │   └── App.jsx           # Roteamento e listeners em tempo real
 │   ├── package.json          # Dependências do frontend
 │   └── vercel.json           # Configuração de roteamento em produção
-└── supabase/                 # Modelos de banco de dados e funções serverless
+└── supabase/                 # Modelos de banco de dados e Edge Functions Deno
 ```
 
 ---
