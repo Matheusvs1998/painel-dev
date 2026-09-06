@@ -9,6 +9,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuery } from '@tanstack/react-query';
 import { fetchGithubEvents } from '../lib/api';
+import RotateButton from './RotateButton';
 
 const C = {
   bg: 'var(--bg)',
@@ -263,6 +264,9 @@ export default function Header({ setIsMobileMenuOpen, session, theme, setTheme, 
           <span className="text-sm leading-none">{i18n.language === 'pt' ? '🇧🇷' : '🇺🇸'}</span>
           <span className="font-mono text-[11px] text-[var(--neon)] font-bold uppercase">{i18n.language === 'pt' ? 'PT' : 'EN'}</span>
         </button>
+
+        {/* Botão de Girar Tela Exclusivo para Mobile */}
+        <RotateButton variant="header" />
       </div>
 
       {/* Modal de Atalhos de Teclado / Dev CheatSheet */}

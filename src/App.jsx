@@ -7,6 +7,7 @@ import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import { App as CapApp } from '@capacitor/app';
 import { supabase } from './lib/supabase';
+import { toggleScreenOrientation } from './utils/orientation';
 import Auth from './components/Auth';
 import AppLayout from './layouts/AppLayout';
 import SplashScreen from './components/SplashScreen';
@@ -261,7 +262,7 @@ export default function App() {
           </div>
           <div className="flex items-center gap-1.5 shrink-0 ml-2">
             <button
-              onClick={handleForceLandscape}
+              onClick={toggleScreenOrientation}
               className="px-2.5 py-1.5 rounded-lg bg-[var(--neon)] text-[var(--bg)] font-bold text-[11px] hover:brightness-110 shadow-sm cursor-pointer"
             >
               Girar

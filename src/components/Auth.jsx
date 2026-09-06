@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, CheckCircle2, Ale
 import Logo from './Logo';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
+import RotateButton from './RotateButton';
 
 export default function Auth() {
   // 'login' | 'signup' | 'verify_otp'
@@ -154,6 +155,11 @@ export default function Auth() {
 
   return (
     <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 bg-[var(--bg)] text-[var(--text)] font-sans overflow-y-auto select-none">
+      {/* Botão de Girar Tela Exclusivo para Mobile */}
+      <div className="absolute top-4 right-4 z-20 md:hidden">
+        <RotateButton variant="pill" />
+      </div>
+
       {/* Elementos Decorativos de Fundo (Glow Orbs) */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[var(--neonDim)] rounded-full blur-[140px] pointer-events-none opacity-40"></div>
       <div className="absolute -bottom-20 right-10 w-[350px] h-[350px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
