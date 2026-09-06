@@ -2,6 +2,13 @@
 
 O **DevSystem** é uma plataforma corporativa completa de observabilidade, automação e desenvolvimento em tempo real, projetada para engenheiros de software e equipes DevOps. A solução unifica o monitoramento contínuo de webhooks do GitHub, telemetria de microsserviços, geração de laudos formais de auditoria e um ambiente de desenvolvimento integrado (**Dev Studio**) com inteligência artificial nativa (**DevAI Copilot**).
 
+<div align="center">
+
+[![Baixar APK Android](https://img.shields.io/badge/Download-DevSystem.apk-00ff9d?style=for-the-badge&logo=android&logoColor=black)](https://drive.google.com/file/d/1xqXn3H4HdmBTJFhDJIT2a-VZuf7uOCvG/view?usp=sharing)
+[![Acessar Aplicação Web](https://img.shields.io/badge/Web_App-painel--dev--steel.vercel.app-00ff9d?style=for-the-badge&logo=vercel&logoColor=black)](https://painel-dev-steel.vercel.app/)
+
+</div>
+
 ---
 
 ## Demonstração Visual da Aplicação
@@ -239,6 +246,23 @@ dev-dashboard/
 │   └── vercel.json           # Configuração de roteamento em produção
 └── supabase/                 # Modelos de banco de dados e Edge Functions Deno
 ```
+
+---
+
+## 📱 Aplicativo Mobile (Android APK)
+
+O **DevSystem** conta com versão nativa para dispositivos móveis Android, configurada para abrir em tela cheia com orientação travada em **modo paisagem (landscape)**, ideal para operar o painel de telemetria e o **Dev Studio**.
+
+| Plataforma | Pacote | Link Oficial de Download |
+| :--- | :--- | :--- |
+| **Android (APK Nativo)** | `DevSystem.apk` | [📥 Baixar APK no Google Drive](https://drive.google.com/file/d/1xqXn3H4HdmBTJFhDJIT2a-VZuf7uOCvG/view?usp=sharing) |
+| **Web / PWA** | `Navegador / Standalone` | [🌐 Acessar na Nuvem (Vercel)](https://painel-dev-steel.vercel.app/) |
+
+#### Instruções de Instalação no Celular:
+1. Acesse o link acima pelo navegador do seu celular Android ou baixe o arquivo **`DevSystem.apk`**.
+2. Abra o arquivo baixado para iniciar a instalação.
+3. Se solicitado pelo Android, autorize a instalação de aplicativos desta fonte (*Configurações > Permitir desta fonte*).
+4. Abra o **DevSystem**: o aplicativo iniciará com o logotipo oficial em verde neon em tela cheia na horizontal.
 
 ---
 
