@@ -29,7 +29,7 @@ const resources = {
         language: 'Language'
       },
       sidebar: {
-        devSystem: 'DevSystem Pro',
+        devSystem: 'DevSystem',
         version: 'v1.2.0 • Active'
       },
       dashboard: {
@@ -71,7 +71,7 @@ const resources = {
         language: 'Idioma'
       },
       sidebar: {
-        devSystem: 'DevSystem Pro',
+        devSystem: 'DevSystem',
         version: 'v1.2.0 • Ativo'
       },
       dashboard: {
