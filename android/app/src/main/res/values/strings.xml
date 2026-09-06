@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DevSystem</string>
+    <string name="title_activity_main">DevSystem</string>
+    <string name="package_name">com.devsystem.dashboard</string>
+    <string name="custom_url_scheme">com.devsystem.dashboard</string>
+</resources>

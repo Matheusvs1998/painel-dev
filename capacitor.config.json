@@ -1,0 +1,10 @@
+{
+  "appId": "com.devsystem.dashboard",
+  "appName": "DevSystem",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://painel-dev-steel.vercel.app",
+    "cleartext": true
+  }
+}
