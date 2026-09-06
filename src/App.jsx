@@ -3,6 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster, toast } from 'sonner';
 import { AnimatePresence } from 'framer-motion';
+import { Capacitor } from '@capacitor/core';
+import { Browser } from '@capacitor/browser';
+import { App as CapApp } from '@capacitor/app';
 import { supabase } from './lib/supabase';
 import Auth from './components/Auth';
 import AppLayout from './layouts/AppLayout';
@@ -43,9 +46,76 @@ export default function App() {
       setIsSplashActive(false);
     }, 1200);
 
+    // Listener para redirecionamentos de login Google (Deep Links no APK)
+    let appUrlSub = null;
+    if (Capacitor.isNativePlatform()) {
+      appUrlSub = CapApp.addListener('appUrlOpen', async ({ url }) => {
+        try {
+          await Browser.close();
+        } catch (e) {}
+
+        if (url) {
+          try {
+            let queryString = '';
+            let hashString = '';
+            if (url.includes('?')) {
+              queryString = url.split('?')[1].split('#')[0];
+            }
+            if (url.includes('#')) {
+              hashString = url.split('#')[1];
+            }
+
+            const queryParams = new URLSearchParams(queryString);
+            const hashParams = new URLSearchParams(hashString);
+
+            const code = queryParams.get('code') || hashParams.get('code');
+            const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
+            const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+
+            if (code) {
+              const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+              if (error) {
+                console.error('Erro PKCE:', error);
+                toast.error('Erro na autenticação: ' + error.message);
+              } else if (data?.session) {
+                setSession(data.session);
+                toast.success('Login com Google realizado com sucesso!');
+              }
+            } else if (accessToken && refreshToken) {
+              const { data, error } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              });
+              if (error) {
+                console.error('Erro ao salvar tokens:', error);
+                toast.error('Erro na sessão: ' + error.message);
+              } else if (data?.session) {
+                setSession(data.session);
+                toast.success('Login com Google realizado com sucesso!');
+              }
+            }
+          } catch (err) {
+            console.error('Erro ao processar URL de autenticação:', err);
+          }
+        }
+      });
+    } else {
+      // Se abrir no navegador comum após login OAuth no celular, redirecionar de volta para o App nativo
+      const hasAuthParams = window.location.hash.includes('access_token=') || window.location.search.includes('code=');
+      if (hasAuthParams && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        const deepLinkUrl = `com.devsystem.dashboard://auth${window.location.search}${window.location.hash}`;
+        setTimeout(() => {
+          window.location.href = deepLinkUrl;
+        }, 300);
+      }
+    }
+
     return () => {
       subscription.unsubscribe();
       clearTimeout(splashTimer);
+      if (appUrlSub) {
+        appUrlSub.then(handle => handle.remove()).catch(() => {});
+      }
     };
   }, []);
 
