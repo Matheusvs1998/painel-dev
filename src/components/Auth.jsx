@@ -168,7 +168,7 @@ export default function Auth() {
   const passwordsMismatch = confirmPassword && password !== confirmPassword;
 
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 bg-[#080d14] text-[var(--text)] font-sans overflow-hidden select-none">
+    <div className="relative min-h-screen w-full flex items-center justify-center p-3 sm:p-6 bg-[var(--bg)] text-[var(--text)] font-sans overflow-y-auto select-none">
       {/* Elementos Decorativos de Fundo (Glow Orbs) */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-[var(--neonDim)] rounded-full blur-[140px] pointer-events-none opacity-40"></div>
       <div className="absolute -bottom-20 right-10 w-[350px] h-[350px] bg-blue-500/10 rounded-full blur-[120px] pointer-events-none"></div>
@@ -178,20 +178,20 @@ export default function Auth() {
         initial={{ opacity: 0, scale: 0.96, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.3 }}
-        className="relative z-10 w-full max-w-[430px] p-8 sm:p-10 rounded-3xl bg-[var(--card)]/90 backdrop-blur-2xl border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.7)]"
+        className="relative z-10 w-full max-w-[430px] landscape:max-w-[500px] p-6 sm:p-10 landscape:py-4 landscape:px-6 rounded-3xl bg-[var(--card)]/90 backdrop-blur-2xl border border-[var(--border)] shadow-[0_20px_50px_rgba(0,0,0,0.7)] my-auto"
       >
         {/* Cabeçalho */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 landscape:mb-3">
           <motion.div 
             whileHover={{ scale: 1.05, rotate: 2 }}
-            className="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center bg-[var(--bg)] border border-[var(--neonBorder)] shadow-[0_0_25px_var(--neonDim)]"
+            className="w-14 h-14 landscape:w-10 landscape:h-10 mx-auto mb-3 landscape:mb-1 rounded-2xl flex items-center justify-center bg-[var(--bg)] border border-[var(--neonBorder)] shadow-[0_0_25px_var(--neonDim)]"
           >
-            <Logo size={36} />
+            <Logo size={30} />
           </motion.div>
-          <h1 className="m-0 text-2xl font-black tracking-tight text-[var(--text)] flex items-center justify-center gap-2">
+          <h1 className="m-0 text-xl sm:text-2xl landscape:text-lg font-black tracking-tight text-[var(--text)] flex items-center justify-center gap-2">
             DevSystem
           </h1>
-          <p className="mt-1.5 text-xs text-[var(--muted)] tracking-wide">
+          <p className="mt-1 text-xs landscape:text-[11px] landscape:mt-0.5 text-[var(--muted)] tracking-wide">
             {authMode === 'verify_otp' 
               ? 'Verificação de Autenticidade' 
               : authMode === 'signup' 
@@ -288,9 +288,9 @@ export default function Auth() {
           </form>
         ) : (
           /* MODO DE LOGIN / CADASTRO */
-          <form onSubmit={handleAuth} className="flex flex-col gap-4">
+          <form onSubmit={handleAuth} className="flex flex-col gap-3 landscape:gap-2">
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1 landscape:mb-0.5">
                 E-mail
               </label>
               <div className="relative">
@@ -301,14 +301,14 @@ export default function Auth() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="seu.email@empresa.com"
-                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-4 py-2.5 text-xs text-[var(--text)] outline-none transition-all"
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-4 py-2.5 landscape:py-1.5 text-xs text-[var(--text)] outline-none transition-all"
                 />
               </div>
             </div>
 
             {/* Campo de Senha */}
             <div>
-              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1.5">
+              <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--subtle)] mb-1 landscape:mb-0.5">
                 Senha
               </label>
               <div className="relative">
@@ -319,7 +319,7 @@ export default function Auth() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••••••"
-                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-10 py-2.5 text-xs text-[var(--text)] outline-none transition-all"
+                  className="w-full bg-[var(--bg)] border border-[var(--border)] focus:border-[var(--neon)] focus:shadow-[0_0_15px_var(--neonDim)] rounded-xl pl-10 pr-10 py-2.5 landscape:py-1.5 text-xs text-[var(--text)] outline-none transition-all"
                 />
                 <button
                   type="button"
@@ -386,13 +386,13 @@ export default function Auth() {
               whileTap={{ scale: 0.98 }}
               type="submit"
               disabled={loading}
-              className="mt-2 w-full py-3 rounded-xl bg-[var(--neon)] text-[var(--bg)] font-black text-xs uppercase tracking-wider shadow-[0_0_20px_var(--neonDim)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="mt-1 landscape:mt-0.5 w-full py-2.5 landscape:py-2 rounded-xl bg-[var(--neon)] text-[var(--bg)] font-black text-xs uppercase tracking-wider shadow-[0_0_20px_var(--neonDim)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               {loading ? 'Processando...' : (authMode === 'login' ? 'Entrar no Sistema' : 'Criar Conta')}
             </motion.button>
 
             {/* Divisor */}
-            <div className="flex items-center gap-3 my-1">
+            <div className="flex items-center gap-3 my-1 landscape:my-0.5">
               <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
               <span className="text-[10px] uppercase tracking-widest text-[var(--subtle)] font-bold">ou</span>
               <div className="flex-1 h-[1px] bg-[var(--border)]"></div>
@@ -402,7 +402,7 @@ export default function Auth() {
             <button
               type="button"
               onClick={handleGoogleLogin}
-              className="w-full py-2.5 px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs font-semibold text-[var(--text)] flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm"
+              className="w-full py-2 landscape:py-1.5 px-4 rounded-xl bg-[var(--bg)] hover:bg-[var(--hover)] border border-[var(--border)] hover:border-[var(--neonBorder)] text-xs font-semibold text-[var(--text)] flex items-center justify-center gap-3 transition-all cursor-pointer shadow-sm"
             >
               <svg width="18" height="18" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -414,7 +414,7 @@ export default function Auth() {
             </button>
 
             {/* Alternância Elegante */}
-            <div className="mt-3 pt-3 border-t border-[var(--border)] text-center">
+            <div className="mt-2 pt-2 landscape:mt-1.5 landscape:pt-1.5 border-t border-[var(--border)] text-center">
               <button
                 type="button"
                 onClick={() => {
