@@ -48,7 +48,10 @@ jobs:
           npx cap sync android || true
 
       - name: Compilar APK (assembleDebug)
-        run: cd android && ./gradlew assembleDebug --stacktrace
+        run: |
+          cd android && ./gradlew assembleDebug --stacktrace
+          cd ..
+          cp android/app/build/outputs/apk/debug/*.apk android/app/build/outputs/apk/debug/DevSystem.apk || true
 
       - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
