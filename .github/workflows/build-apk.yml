@@ -20,6 +20,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Configurar Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
@@ -45,7 +48,7 @@ jobs:
           npx cap sync android || true
 
       - name: Compilar APK (assembleDebug)
-        run: cd android && ./gradlew assembleDebug
+        run: cd android && ./gradlew assembleDebug --stacktrace
 
       - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
