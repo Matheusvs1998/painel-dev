@@ -31,11 +31,11 @@ jobs:
       - name: Compilar Frontend (Vite Build)
         run: npm run build
 
-      - name: Sincronizar Capacitor Android
-        run: npx cap sync android
-
       - name: Conceder Permissão de Execução ao Gradle
         run: chmod +x android/gradlew
+
+      - name: Sincronizar Capacitor Android
+        run: npx cap sync android
 
       - name: Compilar APK (assembleDebug)
         run: cd android && ./gradlew assembleDebug
