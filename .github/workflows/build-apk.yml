@@ -34,6 +34,9 @@ jobs:
       - name: Conceder Permissão de Execução ao Gradle
         run: chmod +x android/gradlew
 
+      - name: Aceitar Licenças do Android SDK
+        run: yes | sdkmanager --licenses || true
+
       - name: Sincronizar Capacitor Android
         run: npx cap sync android
 
