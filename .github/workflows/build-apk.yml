@@ -23,6 +23,11 @@ jobs:
       - name: Configurar Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Instalar Android SDK Platform 36
+        run: |
+          yes | sdkmanager --licenses || true
+          sdkmanager "platforms;android-36" "build-tools;36.0.0" || true
+
       - name: Configurar Node.js
         uses: actions/setup-node@v4
         with:
@@ -49,13 +54,14 @@ jobs:
 
       - name: Compilar APK (assembleDebug)
         run: |
-          cd android && ./gradlew assembleDebug
+          cd android
+          ./gradlew assembleDebug --no-daemon
           cd ..
-          cp android/app/build/outputs/apk/debug/*.apk android/app/build/outputs/apk/debug/DevSystem.apk || true
+          cp android/app/build/outputs/apk/debug/app-debug.apk android/app/build/outputs/apk/debug/DevSystem.apk || true
 
       - name: Disponibilizar APK para Download
         uses: actions/upload-artifact@v4
         with:
           name: DevSystem-APK-Android
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/debug/DevSystem.apk
           retention-days: 30
