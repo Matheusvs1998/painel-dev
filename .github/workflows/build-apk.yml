@@ -37,8 +37,12 @@ jobs:
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Sincronizar Capacitor Android
-        run: npx cap sync android || npx cap copy android
+      - name: Sincronizar Assets do Capacitor
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          cp -r dist/* android/app/src/main/assets/public/
+          cp capacitor.config.json android/app/src/main/assets/
+          npx cap sync android || true
 
       - name: Compilar APK (assembleDebug)
         run: cd android && ./gradlew assembleDebug
