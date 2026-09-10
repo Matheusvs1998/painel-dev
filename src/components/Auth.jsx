@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, RefreshCw, LogIn, CheckCircle2, AlertCircle } from 'lucide-react';
 import Logo from './Logo';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -24,6 +24,10 @@ export default function Auth() {
     e.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
+
+    if (!isSupabaseConfigured) {
+      return setErrorMsg('Configuração do Supabase pendente. Adicione VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY no painel da Vercel (Settings -> Environment Variables).');
+    }
 
     // Validação estrita de senhas no modo de cadastro
     if (authMode === 'signup') {
@@ -215,6 +219,16 @@ export default function Auth() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {!isSupabaseConfigured && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed">
+            <AlertCircle size={17} className="shrink-0 text-amber-400 mt-0.5" />
+            <div>
+              <strong className="block text-amber-300 font-semibold mb-0.5">Configuração Pendente</strong>
+              Defina as variáveis do Supabase no painel da Vercel (Settings &rarr; Environment Variables).
+            </div>
+          </div>
+        )}
 
         {/* MODO DE VERIFICAÇÃO DE TOKEN OTP */}
         {authMode === 'verify_otp' ? (
